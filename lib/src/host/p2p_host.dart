@@ -99,7 +99,7 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
     Duration timeout = const Duration(seconds: 60),
   }) async {
     if (_p2pTransport != null) {
-      await _p2pTransport!.stop().catchError((e) {
+      await _p2pTransport!.stop().catchError((Object e) {
         debugPrint('Host: Error stopping previous P2P transport: $e');
       });
     }
@@ -125,14 +125,18 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
         timeout,
         onTimeout: () {
           throw TimeoutException(
-              'Host: Timed out after $timeout waiting for active hotspot state with IP.');
+            'Host: Timed out after $timeout waiting for active hotspot state with IP.',
+          );
         },
       );
       debugPrint("Host: Received active state with IP: $state");
     } catch (e) {
       debugPrint("Host: Error waiting for hotspot state: $e");
-      await removeGroup().catchError((removeError) => debugPrint(
-          "Host: Error during cleanup after state acquisition failure: $removeError"));
+      await removeGroup().catchError(
+        (Object removeError) => debugPrint(
+          "Host: Error during cleanup after state acquisition failure: $removeError",
+        ),
+      );
       rethrow;
     }
 
@@ -147,10 +151,14 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
       } catch (e) {
         debugPrint('Host: Failed to start BLE advertising: $e');
         _isBleAdvertising = false;
-        await removeGroup().catchError((removeError) => debugPrint(
-            "Host: Error during cleanup after BLE advertising failure: $removeError"));
+        await removeGroup().catchError(
+          (Object removeError) => debugPrint(
+            "Host: Error during cleanup after BLE advertising failure: $removeError",
+          ),
+        );
         throw Exception(
-            'Host: Failed to start BLE advertising, which was requested: $e');
+          'Host: Failed to start BLE advertising, which was requested: $e',
+        );
       }
     } else {
       _isBleAdvertising = false;
@@ -165,8 +173,11 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
       await _p2pTransport!.start();
     } catch (e) {
       debugPrint('Host: Failed to start P2P Transport: $e');
-      await removeGroup().catchError((removeError) => debugPrint(
-          "Host: Error during cleanup after P2P transport start failure: $removeError"));
+      await removeGroup().catchError(
+        (Object removeError) => debugPrint(
+          "Host: Error during cleanup after P2P transport start failure: $removeError",
+        ),
+      );
       throw Exception('Host: Failed to start P2P Transport: $e');
     }
     return state;
@@ -181,13 +192,13 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
     if (_isBleAdvertising) {
       await FlutterP2pConnectionPlatform.instance
           .stopBleAdvertising()
-          .catchError((e) {
+          .catchError((Object e) {
         debugPrint('Host: Error stopping BLE advertising: $e');
       });
       _isBleAdvertising = false;
     }
 
-    await _p2pTransport?.stop().catchError((e) {
+    await _p2pTransport?.stop().catchError((Object e) {
       debugPrint('Host: Error stopping P2P transport: $e');
     });
     _p2pTransport = null;
@@ -195,7 +206,7 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
     if (_isGroupCreated) {
       await FlutterP2pConnectionPlatform.instance
           .removeHotspot()
-          .catchError((e) {
+          .catchError((Object e) {
         debugPrint('Host: Error removing hotspot group natively: $e');
       });
       _isGroupCreated = false;
@@ -228,7 +239,7 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
   Stream<List<P2pClientInfo>> streamClientList() async* {
     while (true) {
       yield _p2pTransport?.clientList ?? [];
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
     }
   }
 
@@ -237,14 +248,17 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
   /// - [text]: The message to send.
   /// - [excludeClientIds]: Optional list of client IDs to exclude from the broadcast.
   /// Throws a [StateError] if the P2P transport is not active.
-  Future<void> broadcastText(String text,
-      {List<String>? excludeClientIds}) async {
+  Future<void> broadcastText(
+    String text, {
+    List<String>? excludeClientIds,
+  }) async {
     final transport = _p2pTransport;
     if (transport == null || transport.portInUse == null) {
       throw StateError(
-          'Host: P2P transport is not active. Ensure createGroup() was called successfully.');
+        'Host: P2P transport is not active. Ensure createGroup() was called successfully.',
+      );
     }
-    var message = P2pMessage(
+    final message = P2pMessage(
       senderId: transport.hostId,
       type: P2pMessageType.payload,
       payload: P2pMessagePayload(text: text),
@@ -262,9 +276,10 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
     final transport = _p2pTransport;
     if (transport == null || transport.portInUse == null) {
       throw StateError(
-          'Host: P2P transport is not active. Ensure createGroup() was called successfully.');
+        'Host: P2P transport is not active. Ensure createGroup() was called successfully.',
+      );
     }
-    var message = P2pMessage(
+    final message = P2pMessage(
       senderId: transport.hostId,
       type: P2pMessageType.payload,
       payload: P2pMessagePayload(text: text),
@@ -279,24 +294,29 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
   /// Returns a [Future] completing with [P2pFileInfo] if the file sharing is initiated,
   /// or `null` on failure.
   /// Throws a [StateError] if P2P transport is not active or host IP is unknown.
-  Future<P2pFileInfo?> broadcastFile(File file,
-      {List<String>? excludeClientIds}) async {
+  Future<P2pFileInfo?> broadcastFile(
+    File file, {
+    List<String>? excludeClientIds,
+  }) async {
     final transport = _p2pTransport;
     if (transport == null || transport.portInUse == null) {
       throw StateError(
-          'Host: P2P transport is not active for broadcasting file.');
+        'Host: P2P transport is not active for broadcasting file.',
+      );
     }
     if (_lastKnownHotspotState?.hostIpAddress == null) {
       throw StateError('Host: Host IP address is unknown. Cannot share file.');
     }
-    var recipients = excludeClientIds == null || excludeClientIds.isEmpty
+    final recipients = excludeClientIds == null || excludeClientIds.isEmpty
         ? null
         : transport.clientList
             .where((client) => !excludeClientIds.contains(client.id))
             .toList();
-    return await transport.shareFile(file,
-        actualSenderIp: _lastKnownHotspotState!.hostIpAddress!,
-        recipients: recipients);
+    return await transport.shareFile(
+      file,
+      actualSenderIp: _lastKnownHotspotState!.hostIpAddress!,
+      recipients: recipients,
+    );
   }
 
   /// Sends a [File] to a specific client.
@@ -314,15 +334,17 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
     if (_lastKnownHotspotState?.hostIpAddress == null) {
       throw StateError('Host: Host IP address is unknown. Cannot share file.');
     }
-    var recipients =
+    final recipients =
         transport.clientList.where((client) => client.id == clientId).toList();
     if (recipients.isEmpty) {
       debugPrint("Host: Client $clientId not found for sending file.");
       return null;
     }
-    return await transport.shareFile(file,
-        actualSenderIp: _lastKnownHotspotState!.hostIpAddress!,
-        recipients: recipients);
+    return await transport.shareFile(
+      file,
+      actualSenderIp: _lastKnownHotspotState!.hostIpAddress!,
+      recipients: recipients,
+    );
   }
 
   /// Provides a stream of text messages received from clients.
@@ -335,9 +357,22 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
     }
     // Wait for transport to be initialized
     while (_p2pTransport == null) {
-      await Future.delayed(const Duration(milliseconds: 100)); // Shorter delay
+      await Future<void>.delayed(
+          const Duration(milliseconds: 100)); // Shorter delay
     }
     yield* _p2pTransport!.receivedTextStream;
+  }
+
+  /// Provides a stream of text messages with sender IDs from clients.
+  Stream<({String senderId, String text})> streamReceivedMessages() async* {
+    if (_p2pTransport != null) {
+      yield* _p2pTransport!.receivedTextWithSenderStream;
+      return;
+    }
+    while (_p2pTransport == null) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
+    yield* _p2pTransport!.receivedTextWithSenderStream;
   }
 
   /// Provides a stream that periodically emits the list of [HostedFileInfo]
@@ -345,7 +380,7 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
   Stream<List<HostedFileInfo>> streamSentFilesInfo() async* {
     while (true) {
       yield _p2pTransport?.hostedFileInfos ?? [];
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
     }
   }
 
@@ -354,7 +389,7 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
   Stream<List<ReceivableFileInfo>> streamReceivedFilesInfo() async* {
     while (true) {
       yield _p2pTransport?.receivableFileInfos ?? [];
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
     }
   }
 
@@ -376,14 +411,15 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
     String saveDirectory, {
     String? customFileName,
     bool? deleteOnError,
-    Function(FileDownloadProgressUpdate)? onProgress,
+    void Function(FileDownloadProgressUpdate)? onProgress,
     int? rangeStart,
     int? rangeEnd,
   }) async {
     final transport = _p2pTransport;
     if (transport == null || transport.portInUse == null) {
       throw StateError(
-          'Host: P2P transport is not active. Ensure createGroup() was called successfully.');
+        'Host: P2P transport is not active. Ensure createGroup() was called successfully.',
+      );
     }
     // Host typically doesn't download from clients unless it's a specific feature
     // For now, assume it's downloading a file it previously received info about.

@@ -31,6 +31,7 @@ import com.ugo.studio.plugins.flutter_p2p_connection.HostManager
 import com.ugo.studio.plugins.flutter_p2p_connection.PermissionsManager
 import com.ugo.studio.plugins.flutter_p2p_connection.ServiceManager
 import com.ugo.studio.plugins.flutter_p2p_connection.BleManager // Import BleManager
+import com.ugo.studio.plugins.flutter_p2p_connection.WifiAwareManager // Import WifiAwareManager
 
 /** FlutterP2pConnectionPlugin Orchestrator */
 class FlutterP2pConnectionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, DefaultLifecycleObserver {
@@ -39,6 +40,7 @@ class FlutterP2pConnectionPlugin : FlutterPlugin, MethodCallHandler, ActivityAwa
 
     // Method Channel
     private lateinit var methodChannel: MethodChannel
+    private lateinit var wifiAwareMethodChannel: MethodChannel
 
     // Event Channels
     private lateinit var clientStateEventChannel: EventChannel
@@ -65,6 +67,7 @@ class FlutterP2pConnectionPlugin : FlutterPlugin, MethodCallHandler, ActivityAwa
     private lateinit var hostManager: HostManager
     private lateinit var clientManager: ClientManager
     private lateinit var bleManager: BleManager 
+    private var wifiAwareManager: WifiAwareManager? = null  // API 26+ only 
 
     private var isInitialized = false
 
@@ -74,6 +77,10 @@ class FlutterP2pConnectionPlugin : FlutterPlugin, MethodCallHandler, ActivityAwa
         applicationContext = flutterPluginBinding.applicationContext
         methodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, Constants.METHOD_CHANNEL_NAME)
         methodChannel.setMethodCallHandler(this)
+        
+        // Wi-Fi Aware Method Channel (API 26+)
+        wifiAwareMethodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, Constants.WIFI_AWARE_METHOD_CHANNEL_NAME)
+        wifiAwareMethodChannel.setMethodCallHandler(WifiAwareMethodCallHandler())
 
         // Setup Event Channels
         clientStateEventChannel = EventChannel(flutterPluginBinding.binaryMessenger, Constants.CLIENT_STATE_EVENT_CHANNEL_NAME)
@@ -89,6 +96,7 @@ class FlutterP2pConnectionPlugin : FlutterPlugin, MethodCallHandler, ActivityAwa
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         Log.d(TAG, "Plugin detached from engine.")
         methodChannel.setMethodCallHandler(null)
+        wifiAwareMethodChannel.setMethodCallHandler(null)
         // Nullify stream handlers - BleManager handles its sinks internally on dispose
         clientStateEventChannel.setStreamHandler(null)
         hotspotStateEventChannel.setStreamHandler(null)
@@ -396,11 +404,106 @@ class FlutterP2pConnectionPlugin : FlutterPlugin, MethodCallHandler, ActivityAwa
         }
         Log.d(TAG, "Disposing Managers...")
         // Dispose in reverse order of creation (optional, but good practice)
+        wifiAwareManager?.dispose()
         if (this::bleManager.isInitialized) bleManager.dispose()
         if (this::clientManager.isInitialized) clientManager.dispose()
         if (this::hostManager.isInitialized) hostManager.dispose()
         // ServiceManager and PermissionsManager don't have explicit dispose methods currently
 
         Log.d(TAG, "Managers disposed.")
+    }
+    
+    // --- Wi-Fi Aware Method Call Handler (API 26+) ---
+    private inner class WifiAwareMethodCallHandler : MethodCallHandler {
+        
+        @RequiresApi(Build.VERSION_CODES.O)
+        override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+            // Check API level first
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                result.error("UNSUPPORTED_API", "Wi-Fi Aware requires Android 8.0 (API 26) or higher", null)
+                return
+            }
+            
+            // Lazy initialize WifiAwareManager
+            if (wifiAwareManager == null) {
+                wifiAwareManager = WifiAwareManager(applicationContext, wifiAwareMethodChannel)
+            }
+            
+            val manager = wifiAwareManager!!
+            
+            try {
+                when (call.method) {
+                    "isWifiAwareAvailable" -> {
+                        result.success(manager.isWifiAwareAvailable())
+                    }
+                    "getCapabilities" -> {
+                        manager.getCapabilities(result)
+                    }
+                    "initializeWifiAware" -> {
+                        manager.initialize(result)
+                    }
+                    "startDiscovery" -> {
+                        val serviceName: String? = call.argument("serviceName")
+                        manager.startDiscovery(serviceName, result)
+                    }
+                    "stopDiscovery" -> {
+                        manager.stopDiscovery(result)
+                    }
+                    "startAdvertising" -> {
+                        val serviceName: String? = call.argument("serviceName")
+                        val peerId: String = call.argument("peerId") ?: run {
+                            result.error("INVALID_ARGS", "Missing 'peerId' argument", null)
+                            return
+                        }
+                        val username: String = call.argument("username") ?: run {
+                            result.error("INVALID_ARGS", "Missing 'username' argument", null)
+                            return
+                        }
+                        val metadata: Map<String, Any>? = call.argument("metadata")
+                        manager.startAdvertising(serviceName, peerId, username, metadata, result)
+                    }
+                    "stopAdvertising" -> {
+                        manager.stopAdvertising(result)
+                    }
+                    "connectToPeer" -> {
+                        val peerId: String = call.argument("peerId") ?: run {
+                            result.error("INVALID_ARGS", "Missing 'peerId' argument", null)
+                            return
+                        }
+                        manager.connectToPeer(peerId, result)
+                    }
+                    "disconnectPeer" -> {
+                        val peerId: String = call.argument("peerId") ?: run {
+                            result.error("INVALID_ARGS", "Missing 'peerId' argument", null)
+                            return
+                        }
+                        manager.disconnectPeer(peerId, result)
+                    }
+                    "sendData" -> {
+                        val peerId: String = call.argument("peerId") ?: run {
+                            result.error("INVALID_ARGS", "Missing 'peerId' argument", null)
+                            return
+                        }
+                        val data: String = call.argument("data") ?: run {
+                            result.error("INVALID_ARGS", "Missing 'data' argument", null)
+                            return
+                        }
+                        manager.sendData(peerId, data, result)
+                    }
+                    "dispose" -> {
+                        manager.dispose()
+                        wifiAwareManager = null
+                        result.success(null)
+                    }
+                    else -> {
+                        Log.w(TAG, "Wi-Fi Aware method not implemented: ${call.method}")
+                        result.notImplemented()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling Wi-Fi Aware method ${call.method}: ${e.message}", e)
+                result.error("WIFI_AWARE_ERROR", "Exception in method ${call.method}: ${e.message}", e.stackTraceToString())
+            }
+        }
     }
 }

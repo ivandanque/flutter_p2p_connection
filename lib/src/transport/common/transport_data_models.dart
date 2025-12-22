@@ -17,8 +17,11 @@ class P2pClientInfo {
   final bool isHost;
 
   /// Creates a [P2pClientInfo] instance.
-  const P2pClientInfo(
-      {required this.id, required this.username, required this.isHost});
+  const P2pClientInfo({
+    required this.id,
+    required this.username,
+    required this.isHost,
+  });
 
   /// Creates a [P2pClientInfo] instance from a JSON map.
   factory P2pClientInfo.fromJson(Map<String, dynamic> json) {
@@ -147,8 +150,10 @@ class P2pMessagePayload {
     return P2pMessagePayload(
       text: json['text'] as String? ?? '',
       files: (json['files'] as List<dynamic>? ?? [])
-          .map((fileJson) =>
-              P2pFileInfo.fromJson(fileJson as Map<String, dynamic>))
+          .map(
+            (fileJson) =>
+                P2pFileInfo.fromJson(fileJson as Map<String, dynamic>),
+          )
           .toList(),
     );
   }
@@ -156,7 +161,8 @@ class P2pMessagePayload {
   /// Creates a [P2pMessagePayload] instance from a JSON string.
   factory P2pMessagePayload.fromJsonString(String jsonString) {
     try {
-      final Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+      final Map<String, dynamic> jsonMap =
+          jsonDecode(jsonString) as Map<String, dynamic>;
       return P2pMessagePayload.fromJson(jsonMap);
     } catch (e) {
       debugPrint("Error decoding P2pMessagePayload from string: $e");
@@ -175,9 +181,9 @@ class P2pMessagePayload {
 
   @override
   String toString() {
-    String textSummary =
+    final String textSummary =
         text.length > 50 ? '${text.substring(0, 47)}...' : text;
-    String filesSummary = files.length > 2
+    final String filesSummary = files.length > 2
         ? '${files.sublist(0, 2).map((f) => f.name)}... (${files.length} total)'
         : files.map((f) => f.name).toString();
     return 'P2pMessagePayload(text: "$textSummary", files: $filesSummary)';
@@ -232,7 +238,8 @@ class P2pFileProgressUpdate {
   /// Creates a [P2pFileProgressUpdate] instance from a JSON string.
   factory P2pFileProgressUpdate.fromJsonString(String jsonString) {
     try {
-      final Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+      final Map<String, dynamic> jsonMap =
+          jsonDecode(jsonString) as Map<String, dynamic>;
       return P2pFileProgressUpdate.fromJson(jsonMap);
     } catch (e) {
       debugPrint("Error decoding P2pFileProgressUpdate from string: $e");
@@ -265,7 +272,8 @@ class P2pFileProgressUpdate {
           bytesDownloaded == other.bytesDownloaded &&
           fileState == fileState;
   @override
-  int get hashCode => Object.hash(fileId, receiverId, bytesDownloaded, fileState);
+  int get hashCode =>
+      Object.hash(fileId, receiverId, bytesDownloaded, fileState);
 }
 
 /// Represents a generic P2P message exchanged between clients.
@@ -295,8 +303,10 @@ class P2pMessage {
 
   /// Creates a [P2pMessage] instance from a JSON map.
   factory P2pMessage.fromJson(Map<String, dynamic> json) {
-    final type = P2pMessageType.values.firstWhere((e) => e.name == json['type'],
-        orElse: () => P2pMessageType.unknown);
+    final type = P2pMessageType.values.firstWhere(
+      (e) => e.name == json['type'],
+      orElse: () => P2pMessageType.unknown,
+    );
     dynamic payloadData;
     if (json['payload'] != null) {
       if (type == P2pMessageType.payload) {
@@ -304,7 +314,8 @@ class P2pMessage {
             P2pMessagePayload.fromJson(json['payload'] as Map<String, dynamic>);
       } else if (type == P2pMessageType.fileProgressUpdate) {
         payloadData = P2pFileProgressUpdate.fromJson(
-            json['payload'] as Map<String, dynamic>);
+          json['payload'] as Map<String, dynamic>,
+        );
       }
     }
 
@@ -313,8 +324,10 @@ class P2pMessage {
       type: type,
       payload: payloadData,
       clients: (json['clients'] as List<dynamic>? ?? [])
-          .map((clientJson) =>
-              P2pClientInfo.fromJson(clientJson as Map<String, dynamic>))
+          .map(
+            (clientJson) =>
+                P2pClientInfo.fromJson(clientJson as Map<String, dynamic>),
+          )
           .toList(),
     );
   }
@@ -322,7 +335,8 @@ class P2pMessage {
   /// Creates a [P2pMessage] instance from a JSON string.
   factory P2pMessage.fromJsonString(String jsonString) {
     try {
-      final Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+      final Map<String, dynamic> jsonMap =
+          jsonDecode(jsonString) as Map<String, dynamic>;
       return P2pMessage.fromJson(jsonMap);
     } catch (e) {
       debugPrint("Error decoding P2pMessage from string: $e");
@@ -335,8 +349,8 @@ class P2pMessage {
         'senderId': senderId,
         'type': type.name,
         'payload': switch (payload) {
-          P2pMessagePayload p => p.toJson(),
-          P2pFileProgressUpdate p => p.toJson(),
+          final P2pMessagePayload p => p.toJson(),
+          final P2pFileProgressUpdate p => p.toJson(),
           _ => null,
         },
         'clients': clients.map((c) => c.toJson()).toList(),
@@ -347,7 +361,7 @@ class P2pMessage {
 
   @override
   String toString() {
-    String clientsSummary = clients.length > 3
+    final String clientsSummary = clients.length > 3
         ? '${clients.sublist(0, 3).map((c) => c.username)}... (${clients.length} total)'
         : clients.map((c) => c.username).toString();
     return 'P2pMessage(senderId: $senderId, type: $type, payload: $payload, clients: $clientsSummary)';

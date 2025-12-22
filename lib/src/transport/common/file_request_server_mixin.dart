@@ -33,7 +33,8 @@ mixin FileRequestServerMixin {
     final hostedFile = hostedFiles[fileId];
     if (hostedFile == null) {
       debugPrint(
-          "$logPrefix: Requested file ID not found or not hosted: $fileId");
+        "$logPrefix: Requested file ID not found or not hosted: $fileId",
+      );
       request.response
         ..statusCode = HttpStatus.notFound
         ..write('File not found or access denied.')
@@ -45,7 +46,8 @@ mixin FileRequestServerMixin {
     final file = File(filePath);
     if (!await file.exists()) {
       debugPrint(
-          "$logPrefix: Hosted file path not found on disk: $filePath (ID: $fileId)");
+        "$logPrefix: Hosted file path not found on disk: $filePath (ID: $fileId)",
+      );
       hostedFiles.remove(fileId);
       request.response
         ..statusCode = HttpStatus.internalServerError
@@ -59,8 +61,10 @@ mixin FileRequestServerMixin {
     final response = request.response;
 
     response.headers.contentType = ContentType.binary;
-    response.headers.add(HttpHeaders.contentDisposition,
-        'attachment; filename="${Uri.encodeComponent(hostedFile.info.name)}"');
+    response.headers.add(
+      HttpHeaders.contentDisposition,
+      'attachment; filename="${Uri.encodeComponent(hostedFile.info.name)}"',
+    );
     response.headers.add(HttpHeaders.acceptRangesHeader, 'bytes');
 
     final rangeHeader = request.headers.value(HttpHeaders.rangeHeader);
@@ -85,11 +89,14 @@ mixin FileRequestServerMixin {
         final rangeLength = (rangeEnd - rangeStart) + 1;
 
         debugPrint(
-            "$logPrefix: Serving range $rangeStart-$rangeEnd (length $rangeLength) for file $fileId");
+          "$logPrefix: Serving range $rangeStart-$rangeEnd (length $rangeLength) for file $fileId",
+        );
         response.statusCode = HttpStatus.partialContent;
         response.headers.contentLength = rangeLength;
-        response.headers.add(HttpHeaders.contentRangeHeader,
-            'bytes $rangeStart-$rangeEnd/$totalSize');
+        response.headers.add(
+          HttpHeaders.contentRangeHeader,
+          'bytes $rangeStart-$rangeEnd/$totalSize',
+        );
         final stream = file.openRead(rangeStart, rangeEnd + 1);
         await response.addStream(stream);
       } catch (e) {
@@ -103,7 +110,8 @@ mixin FileRequestServerMixin {
       }
     } else {
       debugPrint(
-          "$logPrefix: Serving full file $fileId (${hostedFile.info.name})");
+        "$logPrefix: Serving full file $fileId (${hostedFile.info.name})",
+      );
       response.statusCode = HttpStatus.ok;
       response.headers.contentLength = totalSize;
       final stream = file.openRead();

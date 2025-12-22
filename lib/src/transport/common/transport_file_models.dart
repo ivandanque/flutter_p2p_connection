@@ -43,7 +43,10 @@ class HostedFileInfo {
   ///
   /// Only updates if the new [bytes] value is greater than the current progress.
   void updateProgress(
-      String receiverId, int bytes, ReceivableFileState newState) {
+    String receiverId,
+    int bytes,
+    ReceivableFileState newState,
+  ) {
     final currentBytes = _downloadProgressBytes[receiverId] ?? 0;
     if (bytes > currentBytes) {
       _downloadProgressBytes[receiverId] = bytes;

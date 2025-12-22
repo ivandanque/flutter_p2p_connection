@@ -59,7 +59,8 @@ abstract class FlutterP2pConnectionPlatform extends PlatformInterface {
 
   Future<void> disconnectFromHotspot() async {
     throw UnimplementedError(
-        'disconnectFromHotspot() has not been implemented.');
+      'disconnectFromHotspot() has not been implemented.',
+    );
   }
 
   Future<void> startBleAdvertising(String ssid, String psk) async {
@@ -96,12 +97,14 @@ abstract class FlutterP2pConnectionPlatform extends PlatformInterface {
 
   Future<bool> checkLocationEnabled() async {
     throw UnimplementedError(
-        'checkLocationEnabled() has not been implemented.');
+      'checkLocationEnabled() has not been implemented.',
+    );
   }
 
   Future<void> enableLocationServices() async {
     throw UnimplementedError(
-        'enableLocationServices() has not been implemented.');
+      'enableLocationServices() has not been implemented.',
+    );
   }
 
   Future<bool> checkWifiEnabled() async {
@@ -114,12 +117,14 @@ abstract class FlutterP2pConnectionPlatform extends PlatformInterface {
 
   Future<bool> checkBluetoothEnabled() async {
     throw UnimplementedError(
-        'checkBluetoothEnabled() has not been implemented.');
+      'checkBluetoothEnabled() has not been implemented.',
+    );
   }
 
   Future<void> enableBluetoothServices() async {
     throw UnimplementedError(
-        'enableBluetoothServices() has not been implemented.');
+      'enableBluetoothServices() has not been implemented.',
+    );
   }
 
   Stream<HotspotHostState> streamHotspotInfo() {
@@ -128,12 +133,14 @@ abstract class FlutterP2pConnectionPlatform extends PlatformInterface {
 
   Stream<HotspotClientState> streamHotspotClientState() {
     throw UnimplementedError(
-        'streamHotspotClientState() has not been implemented.');
+      'streamHotspotClientState() has not been implemented.',
+    );
   }
 
   Stream<BleConnectionState> streamBleConnectionState() {
     throw UnimplementedError(
-        'streamBleConnectionState() has not been implemented.');
+      'streamBleConnectionState() has not been implemented.',
+    );
   }
 
   Stream<List<BleDiscoveredDevice>> streamBleScanResult() {
@@ -142,6 +149,7 @@ abstract class FlutterP2pConnectionPlatform extends PlatformInterface {
 
   Stream<BleReceivedData> streamBleReceivedData() {
     throw UnimplementedError(
-        'streamBleReceivedData() has not been implemented.');
+      'streamBleReceivedData() has not been implemented.',
+    );
   }
 }

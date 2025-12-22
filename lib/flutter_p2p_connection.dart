@@ -1,9 +1,31 @@
 /// A Flutter plugin for establishing peer-to-peer connections
-/// using Wi-Fi Direct (Group Owner/Hotspot) and BLE for discovery and credential exchange.
+/// using Wi-Fi Direct (Group Owner/Hotspot), Wi-Fi Aware, and BLE
+/// for discovery and credential exchange.
 ///
-/// This library provides classes to act as a P2P host (`FlutterP2pHost`)
-/// or a P2P client (`FlutterP2pClient`), along with necessary data models
-/// for managing connection states, discovered devices, and data transfer.
+/// This library provides classes to act as a P2P host (`FlutterP2pHost`),
+/// a P2P client (`FlutterP2pClient`), or a mesh node (`FlutterP2pMeshNode`),
+/// along with necessary data models for managing connection states,
+/// discovered devices, and data transfer.
+///
+/// ## Mesh Networking
+///
+/// The mesh layer (`FlutterP2pMeshNode`) enables peer-to-peer communication
+/// in a mesh topology where every node can discover, connect to, and relay
+/// messages for other nodes. This allows the network to grow as more peers
+/// connect.
+///
+/// ```dart
+/// final meshNode = FlutterP2pMeshNode(
+///   config: MeshNodeConfig(username: 'Alice'),
+/// );
+/// await meshNode.start();
+///
+/// meshNode.onMessage.listen((message) {
+///   print('From ${message.sourceUsername}: ${message.payload}');
+/// });
+///
+/// await meshNode.broadcast(text: 'Hello, mesh!');
+/// ```
 library flutter_p2p_connection;
 
 // Export common P2P functionalities (Host and Client)
@@ -31,3 +53,37 @@ export 'src/transport/common/transport_data_models.dart'
         P2pMessage;
 export 'src/transport/common/transport_file_models.dart'
     show HostedFileInfo, ReceivableFileInfo, FileDownloadProgressUpdate;
+
+// Export mesh networking layer
+export 'src/mesh/flutter_p2p_mesh_node.dart'
+    show FlutterP2pMeshNode, MeshNodeConfig;
+export 'src/mesh/mesh_models.dart'
+    show
+        MeshPeer,
+        MeshMessage,
+        MeshDataPayload,
+        MeshFileInfo,
+        MeshFileChunk,
+        MeshFileTransferProgress,
+        MeshPeerAnnounce;
+export 'src/mesh/mesh_enums.dart'
+    show
+        MeshMessageType,
+        MeshPeerState,
+        MeshTransportType,
+        MeshFileTransferState;
+export 'src/mesh/mesh_constants.dart';
+export 'src/mesh/mesh_exceptions.dart'
+    show
+        MeshNotInitializedException,
+        MeshPeerNotFoundException,
+        MeshRoutingException,
+        MeshFileTransferException,
+        MeshTransportException,
+        WifiAwareNotSupportedException;
+export 'src/mesh/mesh_router.dart' show MeshRouter;
+export 'src/mesh/adapters/mesh_transport_adapter.dart'
+    show MeshTransportAdapter;
+export 'src/mesh/adapters/wifi_aware_adapter.dart' show WifiAwareAdapter;
+export 'src/mesh/adapters/wifi_direct_ble_adapter.dart'
+    show WifiDirectBleAdapter;

@@ -224,9 +224,11 @@ class BleManager(
 
         setupGattServer(ssid, psk) { success ->
             if (success) {
+                // Boost TX power to improve credential reach. Some devices barely
+                // pick up BLE adverts beyond ~1 m at MEDIUM power.
                 val settings = AdvertiseSettings.Builder()
                     .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
-                    .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM)
+                    .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
                     .setConnectable(true)
                     .build()
 

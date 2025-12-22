@@ -83,13 +83,17 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
   /// to release system resources.
   Future<void> dispose() async {
     await _p2pTransport?.dispose().catchError(
-        (e) => debugPrint("Client: Error disposing transport in dispose: $e"));
+          (Object e) =>
+              debugPrint("Client: Error disposing transport in dispose: $e"),
+        );
     _p2pTransport = null;
     _lastKnownClientState = null;
     await stopScan().catchError(
-        (e) => debugPrint("Client: Error stopping scan in dispose: $e"));
+      (Object e) => debugPrint("Client: Error stopping scan in dispose: $e"),
+    );
     await disconnect().catchError(
-        (e) => debugPrint("Client: Error disconnecting in dispose: $e"));
+      (Object e) => debugPrint("Client: Error disconnecting in dispose: $e"),
+    );
     await FlutterP2pConnectionPlatform.instance.dispose();
     debugPrint("FlutterP2pClient disposed.");
   }
@@ -110,7 +114,7 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
   /// Throws an exception if starting the native BLE scan fails.
   Future<StreamSubscription<List<BleDiscoveredDevice>>> startScan(
     void Function(List<BleDiscoveredDevice>)? onData, {
-    Function? onError,
+    void Function(Object)? onError,
     void Function()? onDone,
     bool? cancelOnError,
     Duration timeout = const Duration(seconds: 15),
@@ -126,7 +130,7 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
       (devices) {
         if (_isScanning) onData?.call(devices);
       },
-      onError: (error) {
+      onError: (Object error) {
         debugPrint("Client: BLE Scan stream error: $error");
         onError?.call(error);
         if (cancelOnError ?? false) {
@@ -193,10 +197,14 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
       // Or if stopScan is called multiple times.
       // Ensure native scan is stopped if no Dart stream to cancel.
       debugPrint(
-          "Client: No active scan stream subscription to cancel, ensuring native scan is stopped.");
-      await FlutterP2pConnectionPlatform.instance.stopBleScan().catchError((e) {
+        "Client: No active scan stream subscription to cancel, ensuring native scan is stopped.",
+      );
+      await FlutterP2pConnectionPlatform.instance
+          .stopBleScan()
+          .catchError((Object e) {
         debugPrint(
-            'Client: Error stopping BLE scan natively during explicit stopScan (no stream sub): $e');
+          'Client: Error stopping BLE scan natively during explicit stopScan (no stream sub): $e',
+        );
       });
     }
     debugPrint("Client: BLE scan stop process finished.");
@@ -219,7 +227,7 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
     BleDiscoveredDevice device, {
     Duration timeout = const Duration(seconds: 20),
   }) async {
-    String deviceAddress = device.deviceAddress;
+    final String deviceAddress = device.deviceAddress;
     debugPrint("Client: Connecting to BLE device $deviceAddress...");
     await FlutterP2pConnectionPlatform.instance.connectBleDevice(deviceAddress);
     debugPrint("Client: Connected to BLE device $deviceAddress.");
@@ -234,7 +242,7 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
           FlutterP2pConnectionPlatform.instance.streamBleReceivedData().listen(
         (evt) {
           if (evt.deviceAddress == deviceAddress) {
-            String value = String.fromCharCodes(evt.data);
+            final String value = String.fromCharCodes(evt.data);
             if (ssid == null) {
               ssid = value;
               debugPrint("Client: Received SSID via BLE: $ssid");
@@ -245,28 +253,37 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
             }
           }
         },
-        onError: (error) {
+        onError: (Object error) {
           if (!completer.isCompleted) {
             completer.completeError(
-                Exception('Client: Error receiving BLE data: $error'));
+              Exception('Client: Error receiving BLE data: $error'),
+            );
           }
         },
         onDone: () {
           if (!completer.isCompleted) {
-            completer.completeError(Exception(
-                'Client: BLE data stream ended before receiving credentials.'));
+            completer.completeError(
+              Exception(
+                'Client: BLE data stream ended before receiving credentials.',
+              ),
+            );
           }
         },
       );
 
-      await completer.future.timeout(timeout, onTimeout: () {
-        throw TimeoutException(
-            'Client: Timed out waiting for hotspot credentials via BLE after $timeout.');
-      });
+      await completer.future.timeout(
+        timeout,
+        onTimeout: () {
+          throw TimeoutException(
+            'Client: Timed out waiting for hotspot credentials via BLE after $timeout.',
+          );
+        },
+      );
 
       if (ssid == null || psk == null) {
         throw Exception(
-            'Client: Failed to receive valid hotspot SSID and PSK via BLE.');
+          'Client: Failed to receive valid hotspot SSID and PSK via BLE.',
+        );
       }
 
       debugPrint("Client: Attempting to connect to hotspot: $ssid");
@@ -279,9 +296,10 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
       await bleDataSub?.cancel();
       await FlutterP2pConnectionPlatform.instance
           .disconnectBleDevice(deviceAddress)
-          .catchError((e) {
+          .catchError((Object e) {
         debugPrint(
-            'Client: Error disconnecting from BLE device $deviceAddress: $e');
+          'Client: Error disconnecting from BLE device $deviceAddress: $e',
+        );
       });
       debugPrint("Client: Disconnected from BLE device $deviceAddress.");
     }
@@ -308,7 +326,7 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
         const Duration(seconds: 60), // Increased default for Wi-Fi connection
   }) async {
     debugPrint("Client: Connecting to hotspot '$ssid'...");
-    await _p2pTransport?.disconnect().catchError((e) {
+    await _p2pTransport?.disconnect().catchError((Object e) {
       debugPrint('Client: Error disconnecting previous P2P transport: $e');
     });
     await _p2pTransport?.dispose();
@@ -333,14 +351,18 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
         timeout,
         onTimeout: () {
           throw TimeoutException(
-              'Client: Timed out after $timeout waiting for active connection state with gateway and client IP.');
+            'Client: Timed out after $timeout waiting for active connection state with gateway and client IP.',
+          );
         },
       );
       debugPrint("Client: Received active connection state: $state");
     } catch (e) {
       debugPrint("Client: Error waiting for connection state: $e");
-      await disconnect().catchError((disconnectError) => debugPrint(
-          "Client: Error during cleanup after connection state failure: $disconnectError"));
+      await disconnect().catchError(
+        (Object disconnectError) => debugPrint(
+          "Client: Error during cleanup after connection state failure: $disconnectError",
+        ),
+      );
       rethrow;
     }
 
@@ -355,8 +377,11 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
       await _p2pTransport!.connect();
     } catch (e) {
       debugPrint('Client: Failed to connect P2P Transport: $e');
-      await disconnect().catchError((disconnectError) => debugPrint(
-          "Client: Error during cleanup after P2P transport connection failure: $disconnectError"));
+      await disconnect().catchError(
+        (Object disconnectError) => debugPrint(
+          "Client: Error during cleanup after P2P transport connection failure: $disconnectError",
+        ),
+      );
       throw Exception('Client: Failed to connect P2P Transport: $e');
     }
   }
@@ -367,10 +392,10 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
   /// platform disconnection from the hotspot.
   Future<void> disconnect() async {
     debugPrint("Client: Disconnecting from hotspot...");
-    await _p2pTransport?.disconnect().catchError((e) {
+    await _p2pTransport?.disconnect().catchError((Object e) {
       debugPrint('Client: Error disconnecting P2P transport: $e');
     });
-    await _p2pTransport?.dispose().catchError((e) {
+    await _p2pTransport?.dispose().catchError((Object e) {
       debugPrint('Client: Error disposing P2P transport: $e');
     });
     _p2pTransport = null;
@@ -378,7 +403,7 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
 
     await FlutterP2pConnectionPlatform.instance
         .disconnectFromHotspot()
-        .catchError((e) {
+        .catchError((Object e) {
       debugPrint('Client: Error disconnecting from hotspot natively: $e');
     });
     debugPrint("Client: Native hotspot disconnection process finished.");
@@ -410,7 +435,7 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
   Stream<List<P2pClientInfo>> streamClientList() async* {
     while (true) {
       yield _p2pTransport?.clientList ?? [];
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
     }
   }
 
@@ -423,15 +448,18 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
     final transport = _p2pTransport;
     if (transport == null || !transport.isConnected) {
       throw StateError(
-          'Client: P2P transport is not connected. Cannot broadcast data.');
+        'Client: P2P transport is not connected. Cannot broadcast data.',
+      );
     }
-    var message = P2pMessage(
+    final message = P2pMessage(
       senderId: transport.clientId,
       type: P2pMessageType.payload,
       payload: P2pMessagePayload(text: text),
       clients: transport.clientList
-          .where((client) =>
-              client.id != excludeClientId && client.id != transport.clientId)
+          .where(
+            (client) =>
+                client.id != excludeClientId && client.id != transport.clientId,
+          )
           .toList(), // Exclude self and optionally another
     );
     await transport.send(message);
@@ -447,7 +475,8 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
     final transport = _p2pTransport;
     if (transport == null || !transport.isConnected) {
       throw StateError(
-          'Client: P2P transport is not connected. Cannot send data.');
+        'Client: P2P transport is not connected. Cannot send data.',
+      );
     }
     final targetClient = transport.clientList
         .where((c) => c.id == clientId)
@@ -456,7 +485,7 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
       debugPrint("Client: Target client $clientId not found in client list.");
       return false;
     }
-    var message = P2pMessage(
+    final message = P2pMessage(
       senderId: transport.clientId,
       type: P2pMessageType.payload,
       payload: P2pMessagePayload(text: text),
@@ -472,28 +501,38 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
   /// Returns a [Future] completing with [P2pFileInfo] if the file sharing is initiated,
   /// or `null` on failure.
   /// Throws a [StateError] if P2P transport is not connected or client IP is unknown.
-  Future<P2pFileInfo?> broadcastFile(File file,
-      {List<String>? excludeClientIds}) async {
+  Future<P2pFileInfo?> broadcastFile(
+    File file, {
+    List<String>? excludeClientIds,
+  }) async {
     final transport = _p2pTransport;
     if (transport == null || !transport.isConnected) {
       throw StateError(
-          'Client: P2P transport is not connected for broadcasting file.');
+        'Client: P2P transport is not connected for broadcasting file.',
+      );
     }
     if (_lastKnownClientState?.hostIpAddress == null) {
       // This is client's own IP in group
       throw StateError(
-          'Client: Client IP address in group is unknown. Cannot share file.');
+        'Client: Client IP address in group is unknown. Cannot share file.',
+      );
     }
 
-    var recipients = transport.clientList
-        .where((client) =>
-            client.id != transport.clientId &&
-            (excludeClientIds == null || !excludeClientIds.contains(client.id)))
+    final recipients = transport.clientList
+        .where(
+          (client) =>
+              client.id != transport.clientId &&
+              (excludeClientIds == null ||
+                  !excludeClientIds.contains(client.id)),
+        )
         .toList();
-    var actualSenderIp =
+    final actualSenderIp =
         await getLocalIpAddress() ?? _lastKnownClientState!.hostIpAddress!;
-    return await transport.shareFile(file,
-        actualSenderIp: actualSenderIp, recipients: recipients);
+    return await transport.shareFile(
+      file,
+      actualSenderIp: actualSenderIp,
+      recipients: recipients,
+    );
   }
 
   /// Sends a [File] to a specific client in the group.
@@ -507,23 +546,28 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
     final transport = _p2pTransport;
     if (transport == null || !transport.isConnected) {
       throw StateError(
-          'Client: P2P transport is not connected for sending file.');
+        'Client: P2P transport is not connected for sending file.',
+      );
     }
     if (_lastKnownClientState?.hostIpAddress == null) {
       // This is client's own IP in group
       throw StateError(
-          'Client: Client IP address in group is unknown. Cannot share file.');
+        'Client: Client IP address in group is unknown. Cannot share file.',
+      );
     }
-    var recipients =
+    final recipients =
         transport.clientList.where((client) => client.id == clientId).toList();
     if (recipients.isEmpty) {
       debugPrint("Client: Target client $clientId not found for sending file.");
       return null;
     }
-    var actualSenderIp =
+    final actualSenderIp =
         await getLocalIpAddress() ?? _lastKnownClientState!.hostIpAddress!;
-    return await transport.shareFile(file,
-        actualSenderIp: actualSenderIp, recipients: recipients);
+    return await transport.shareFile(
+      file,
+      actualSenderIp: actualSenderIp,
+      recipients: recipients,
+    );
   }
 
   /// Provides a stream of text messages received from the host or other clients.
@@ -534,9 +578,21 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
       return;
     }
     while (_p2pTransport == null) {
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
     }
     yield* _p2pTransport!.receivedTextStream;
+  }
+
+  /// Provides a stream of text messages with sender IDs.
+  Stream<({String senderId, String text})> streamReceivedMessages() async* {
+    if (_p2pTransport != null) {
+      yield* _p2pTransport!.receivedTextWithSenderStream;
+      return;
+    }
+    while (_p2pTransport == null) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
+    yield* _p2pTransport!.receivedTextWithSenderStream;
   }
 
   /// Provides a stream that periodically emits the list of [HostedFileInfo]
@@ -544,7 +600,7 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
   Stream<List<HostedFileInfo>> streamSentFilesInfo() async* {
     while (true) {
       yield _p2pTransport?.hostedFileInfos ?? [];
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
     }
   }
 
@@ -553,7 +609,7 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
   Stream<List<ReceivableFileInfo>> streamReceivedFilesInfo() async* {
     while (true) {
       yield _p2pTransport?.receivableFileInfos ?? [];
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
     }
   }
 
@@ -575,14 +631,15 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
     String saveDirectory, {
     String? customFileName,
     bool? deleteOnError,
-    Function(FileDownloadProgressUpdate)? onProgress,
+    void Function(FileDownloadProgressUpdate)? onProgress,
     int? rangeStart,
     int? rangeEnd,
   }) async {
     final transport = _p2pTransport;
     if (transport == null || !transport.isConnected) {
       throw StateError(
-          'Client: P2P transport is not connected. Cannot download file.');
+        'Client: P2P transport is not connected. Cannot download file.',
+      );
     }
     return await transport.downloadFile(
       fileId,

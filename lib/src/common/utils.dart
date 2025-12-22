@@ -6,7 +6,9 @@ Future<String?> getLocalIpAddress() async {
     // Setting includeLoopback to false filters out the loopback interface (127.0.0.1)
     // Setting internetAddressType to InternetAddressType.IPv4 ensures we only get IPv4 addresses
     final interfaces = await NetworkInterface.list(
-        includeLoopback: false, type: InternetAddressType.IPv4);
+      includeLoopback: false,
+      type: InternetAddressType.IPv4,
+    );
 
     for (var interface in interfaces) {
       // The addresses property of a NetworkInterface object is a list of InternetAddress objects.

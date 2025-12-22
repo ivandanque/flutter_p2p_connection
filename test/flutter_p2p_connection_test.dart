@@ -11,6 +11,9 @@ class MockFlutterP2pConnectionPlatform
   Future<String> getPlatformVersion() => Future.value('42');
 
   @override
+  Future<String> getPlatformModel() => Future.value('Test Model');
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -23,8 +26,8 @@ void main() {
   });
 
   test('getDeviceModel', () async {
-    FlutterP2pClient flutterP2pConnectionPlugin = FlutterP2pClient();
-    MockFlutterP2pConnectionPlatform fakePlatform =
+    final FlutterP2pClient flutterP2pConnectionPlugin = FlutterP2pClient();
+    final MockFlutterP2pConnectionPlatform fakePlatform =
         MockFlutterP2pConnectionPlatform();
     FlutterP2pConnectionPlatform.instance = fakePlatform;
 

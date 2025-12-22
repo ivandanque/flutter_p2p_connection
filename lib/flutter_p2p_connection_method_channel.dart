@@ -306,18 +306,21 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
           return HotspotHostState.fromMap(Map.from(event));
         } catch (e) {
           debugPrint(
-              "[MethodChannelFlutterP2pConnection] Error parsing HotspotHostState: $e, Event: $event");
+            "[MethodChannelFlutterP2pConnection] Error parsing HotspotHostState: $e, Event: $event",
+          );
           // Depending on requirements, you might want to return a default error state
           // or filter out invalid events. Here, we rethrow to signal a parsing issue.
           rethrow;
         }
       } else {
         debugPrint(
-            "[MethodChannelFlutterP2pConnection] Received non-map event on hotspotStateEventChannel: $event");
+          "[MethodChannelFlutterP2pConnection] Received non-map event on hotspotStateEventChannel: $event",
+        );
         // Filter out unexpected event types by returning null or throwing
         // For robustness, let's throw an error indicating unexpected data.
         throw FormatException(
-            "Received unexpected data type on hotspotStateEventChannel: ${event.runtimeType}");
+          "Received unexpected data type on hotspotStateEventChannel: ${event.runtimeType}",
+        );
       }
     })
         // Ensure the resulting stream is broadcast (map usually preserves it, but this is explicit)
@@ -342,14 +345,17 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
           return HotspotClientState.fromMap(Map.from(event));
         } catch (e) {
           debugPrint(
-              "[MethodChannelFlutterP2pConnection] Error parsing HotspotClientState: $e, Event: $event");
+            "[MethodChannelFlutterP2pConnection] Error parsing HotspotClientState: $e, Event: $event",
+          );
           rethrow;
         }
       } else {
         debugPrint(
-            "[MethodChannelFlutterP2pConnection] Received non-map event on clientStateEventChannel: $event");
+          "[MethodChannelFlutterP2pConnection] Received non-map event on clientStateEventChannel: $event",
+        );
         throw FormatException(
-            "Received unexpected data type on clientStateEventChannel: ${event.runtimeType}");
+          "Received unexpected data type on clientStateEventChannel: ${event.runtimeType}",
+        );
       }
     }).asBroadcastStream();
     return _clientStateStream!;
@@ -372,14 +378,17 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
           return BleConnectionState.fromMap(Map.from(event));
         } catch (e) {
           debugPrint(
-              "[MethodChannelFlutterP2pConnection] Error parsing BleConnectionState: $e, Event: $event");
+            "[MethodChannelFlutterP2pConnection] Error parsing BleConnectionState: $e, Event: $event",
+          );
           rethrow;
         }
       } else {
         debugPrint(
-            "[MethodChannelFlutterP2pConnection] Received non-map event on bleConnectionStateEventChannel: $event");
+          "[MethodChannelFlutterP2pConnection] Received non-map event on bleConnectionStateEventChannel: $event",
+        );
         throw FormatException(
-            "Received unexpected data type on bleConnectionStateEventChannel: ${event.runtimeType}");
+          "Received unexpected data type on bleConnectionStateEventChannel: ${event.runtimeType}",
+        );
       }
     }).asBroadcastStream();
     return _bleConnectionStateStream!;
@@ -400,20 +409,27 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
       if (event is List) {
         try {
           return event
-              .whereType<Map>() // Filter out any non-map elements defensively
-              .map((deviceMap) =>
-                  BleDiscoveredDevice.fromMap(Map.from(deviceMap)))
+              .whereType<
+                  Map<dynamic,
+                      dynamic>>() // Filter out any non-map elements defensively
+              .map(
+                (deviceMap) => BleDiscoveredDevice.fromMap(
+                    Map<dynamic, dynamic>.from(deviceMap)),
+              )
               .toList();
         } catch (e) {
           debugPrint(
-              "[MethodChannelFlutterP2pConnection] Error parsing BleDiscoveredDevice list: $e, Event: $event");
+            "[MethodChannelFlutterP2pConnection] Error parsing BleDiscoveredDevice list: $e, Event: $event",
+          );
           rethrow;
         }
       } else {
         debugPrint(
-            "[MethodChannelFlutterP2pConnection] Received non-list event on bleScanResultEventChannel: $event");
+          "[MethodChannelFlutterP2pConnection] Received non-list event on bleScanResultEventChannel: $event",
+        );
         throw FormatException(
-            "Received unexpected data type on bleScanResultEventChannel: ${event.runtimeType}");
+          "Received unexpected data type on bleScanResultEventChannel: ${event.runtimeType}",
+        );
       }
     }).asBroadcastStream();
     return _bleScanResultStream!;
@@ -437,14 +453,17 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
           return BleReceivedData.fromMap(Map.from(event));
         } catch (e) {
           debugPrint(
-              "[MethodChannelFlutterP2pConnection] Error parsing BleReceivedData: $e, Event: $event");
+            "[MethodChannelFlutterP2pConnection] Error parsing BleReceivedData: $e, Event: $event",
+          );
           rethrow;
         }
       } else {
         debugPrint(
-            "[MethodChannelFlutterP2pConnection] Received non-map event on bleReceivedDataEventChannel: $event");
+          "[MethodChannelFlutterP2pConnection] Received non-map event on bleReceivedDataEventChannel: $event",
+        );
         throw FormatException(
-            "Received unexpected data type on bleReceivedDataEventChannel: ${event.runtimeType}");
+          "Received unexpected data type on bleReceivedDataEventChannel: ${event.runtimeType}",
+        );
       }
     }).asBroadcastStream();
     return _bleReceivedDataStream!;
