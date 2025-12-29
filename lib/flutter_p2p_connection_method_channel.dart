@@ -9,35 +9,41 @@ import 'flutter_p2p_connection_platform_interface.dart';
 class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
   /// The method channel used to invoke native methods.
   @visibleForTesting
-  final MethodChannel methodChannel =
-      const MethodChannel('flutter_p2p_connection');
+  final MethodChannel methodChannel = const MethodChannel(
+    'flutter_p2p_connection',
+  );
 
   // --- Event Channels for receiving streams from native ---
 
   /// The event channel for receiving [HotspotHostState] updates.
   @visibleForTesting
-  final EventChannel hotspotStateEventChannel =
-      const EventChannel('flutter_p2p_connection_hotspotState');
+  final EventChannel hotspotStateEventChannel = const EventChannel(
+    'flutter_p2p_connection_hotspotState',
+  );
 
   /// The event channel for receiving [HotspotClientState] updates.
   @visibleForTesting
-  final EventChannel clientStateEventChannel =
-      const EventChannel('flutter_p2p_connection_clientState');
+  final EventChannel clientStateEventChannel = const EventChannel(
+    'flutter_p2p_connection_clientState',
+  );
 
   /// The event channel for receiving [BleConnectionState] updates.
   @visibleForTesting
-  final EventChannel bleConnectionStateEventChannel =
-      const EventChannel('flutter_p2p_connection_bleConnectionState');
+  final EventChannel bleConnectionStateEventChannel = const EventChannel(
+    'flutter_p2p_connection_bleConnectionState',
+  );
 
   /// The event channel for receiving lists of [BleDiscoveredDevice] during scans.
   @visibleForTesting
-  final EventChannel bleScanResultEventChannel =
-      const EventChannel('flutter_p2p_connection_bleScanResult');
+  final EventChannel bleScanResultEventChannel = const EventChannel(
+    'flutter_p2p_connection_bleScanResult',
+  );
 
   /// The event channel for receiving [BleReceivedData] from connected BLE devices.
   @visibleForTesting
-  final EventChannel bleReceivedDataEventChannel =
-      const EventChannel('flutter_p2p_connection_bleReceivedData');
+  final EventChannel bleReceivedDataEventChannel = const EventChannel(
+    'flutter_p2p_connection_bleReceivedData',
+  );
 
   // --- Cached Stream Instances ---
   // Caching streams avoids recreating the stream pipeline on every call.
@@ -55,7 +61,7 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
   Future<String> getPlatformVersion() async {
     final String version =
         await methodChannel.invokeMethod('getPlatformVersion') ??
-            'Unknown Platform Version';
+        'Unknown Platform Version';
     return version;
   }
 
@@ -65,7 +71,8 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
   /// Returns a [Future] completing with the device model string.
   @override
   Future<String> getPlatformModel() async {
-    final String model = await methodChannel.invokeMethod('getPlatformModel') ??
+    final String model =
+        await methodChannel.invokeMethod('getPlatformModel') ??
         'Unknown Device Model';
     return model;
   }
@@ -128,10 +135,10 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
   /// Returns a [Future] that completes when the connection attempt is initiated.
   @override
   Future<void> connectToHotspot(String ssid, String psk) async {
-    await methodChannel.invokeMethod(
-      'connectToHotspot',
-      {'ssid': ssid, 'psk': psk},
-    );
+    await methodChannel.invokeMethod('connectToHotspot', {
+      'ssid': ssid,
+      'psk': psk,
+    });
   }
 
   /// Disconnects from the currently connected Wi-Fi Direct hotspot.
@@ -151,10 +158,10 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
   /// Returns a [Future] that completes when advertising is started.
   @override
   Future<void> startBleAdvertising(String ssid, String psk) async {
-    await methodChannel.invokeMethod(
-      'ble#startAdvertising',
-      {'ssid': ssid, 'psk': psk},
-    );
+    await methodChannel.invokeMethod('ble#startAdvertising', {
+      'ssid': ssid,
+      'psk': psk,
+    });
   }
 
   /// Stops ongoing BLE advertising.
@@ -191,10 +198,9 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
   /// Returns a [Future] that completes when the connection attempt is initiated.
   @override
   Future<void> connectBleDevice(String deviceAddress) async {
-    await methodChannel.invokeMethod(
-      'ble#connect',
-      {'deviceAddress': deviceAddress},
-    );
+    await methodChannel.invokeMethod('ble#connect', {
+      'deviceAddress': deviceAddress,
+    });
   }
 
   /// Disconnects from a connected BLE device.
@@ -203,10 +209,9 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
   /// Returns a [Future] that completes when the disconnection process is initiated.
   @override
   Future<void> disconnectBleDevice(String deviceAddress) async {
-    await methodChannel.invokeMethod(
-      'ble#disconnect',
-      {'deviceAddress': deviceAddress},
-    );
+    await methodChannel.invokeMethod('ble#disconnect', {
+      'deviceAddress': deviceAddress,
+    });
   }
 
   /// Checks if the necessary Wi-Fi P2P (Wi-Fi Direct) permissions are granted.
@@ -215,8 +220,9 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
   /// Returns a [Future] completing with `true` if permissions are granted, `false` otherwise.
   @override
   Future<bool> checkP2pPermissions() async {
-    final bool? hasPermission =
-        await methodChannel.invokeMethod('checkP2pPermissions');
+    final bool? hasPermission = await methodChannel.invokeMethod(
+      'checkP2pPermissions',
+    );
     return hasPermission ?? false;
   }
 
@@ -236,8 +242,9 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
   /// Returns a [Future] completing with `true` if enabled, `false` otherwise.
   @override
   Future<bool> checkLocationEnabled() async {
-    final bool? enabled =
-        await methodChannel.invokeMethod('checkLocationEnabled');
+    final bool? enabled = await methodChannel.invokeMethod(
+      'checkLocationEnabled',
+    );
     return enabled ?? false;
   }
 
@@ -273,8 +280,9 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
   /// Returns a [Future] completing with `true` if enabled, `false` otherwise.
   @override
   Future<bool> checkBluetoothEnabled() async {
-    final bool? enabled =
-        await methodChannel.invokeMethod('checkBluetoothEnabled');
+    final bool? enabled = await methodChannel.invokeMethod(
+      'checkBluetoothEnabled',
+    );
     return enabled ?? false;
   }
 
@@ -300,29 +308,29 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
     _hotspotInfoStream ??= hotspotStateEventChannel
         .receiveBroadcastStream()
         .map((dynamic event) {
-      // Ensure the event is a Map before attempting to parse
-      if (event is Map) {
-        try {
-          return HotspotHostState.fromMap(Map.from(event));
-        } catch (e) {
-          debugPrint(
-            "[MethodChannelFlutterP2pConnection] Error parsing HotspotHostState: $e, Event: $event",
-          );
-          // Depending on requirements, you might want to return a default error state
-          // or filter out invalid events. Here, we rethrow to signal a parsing issue.
-          rethrow;
-        }
-      } else {
-        debugPrint(
-          "[MethodChannelFlutterP2pConnection] Received non-map event on hotspotStateEventChannel: $event",
-        );
-        // Filter out unexpected event types by returning null or throwing
-        // For robustness, let's throw an error indicating unexpected data.
-        throw FormatException(
-          "Received unexpected data type on hotspotStateEventChannel: ${event.runtimeType}",
-        );
-      }
-    })
+          // Ensure the event is a Map before attempting to parse
+          if (event is Map) {
+            try {
+              return HotspotHostState.fromMap(Map.from(event));
+            } catch (e) {
+              debugPrint(
+                "[MethodChannelFlutterP2pConnection] Error parsing HotspotHostState: $e, Event: $event",
+              );
+              // Depending on requirements, you might want to return a default error state
+              // or filter out invalid events. Here, we rethrow to signal a parsing issue.
+              rethrow;
+            }
+          } else {
+            debugPrint(
+              "[MethodChannelFlutterP2pConnection] Received non-map event on hotspotStateEventChannel: $event",
+            );
+            // Filter out unexpected event types by returning null or throwing
+            // For robustness, let's throw an error indicating unexpected data.
+            throw FormatException(
+              "Received unexpected data type on hotspotStateEventChannel: ${event.runtimeType}",
+            );
+          }
+        })
         // Ensure the resulting stream is broadcast (map usually preserves it, but this is explicit)
         .asBroadcastStream();
     return _hotspotInfoStream!;
@@ -338,8 +346,9 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
   /// Returns a [Stream] of [HotspotClientState].
   @override
   Stream<HotspotClientState> streamHotspotClientState() {
-    _clientStateStream ??=
-        clientStateEventChannel.receiveBroadcastStream().map((dynamic event) {
+    _clientStateStream ??= clientStateEventChannel.receiveBroadcastStream().map((
+      dynamic event,
+    ) {
       if (event is Map) {
         try {
           return HotspotClientState.fromMap(Map.from(event));
@@ -373,24 +382,25 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
     _bleConnectionStateStream ??= bleConnectionStateEventChannel
         .receiveBroadcastStream()
         .map((dynamic event) {
-      if (event is Map) {
-        try {
-          return BleConnectionState.fromMap(Map.from(event));
-        } catch (e) {
-          debugPrint(
-            "[MethodChannelFlutterP2pConnection] Error parsing BleConnectionState: $e, Event: $event",
-          );
-          rethrow;
-        }
-      } else {
-        debugPrint(
-          "[MethodChannelFlutterP2pConnection] Received non-map event on bleConnectionStateEventChannel: $event",
-        );
-        throw FormatException(
-          "Received unexpected data type on bleConnectionStateEventChannel: ${event.runtimeType}",
-        );
-      }
-    }).asBroadcastStream();
+          if (event is Map) {
+            try {
+              return BleConnectionState.fromMap(Map.from(event));
+            } catch (e) {
+              debugPrint(
+                "[MethodChannelFlutterP2pConnection] Error parsing BleConnectionState: $e, Event: $event",
+              );
+              rethrow;
+            }
+          } else {
+            debugPrint(
+              "[MethodChannelFlutterP2pConnection] Received non-map event on bleConnectionStateEventChannel: $event",
+            );
+            throw FormatException(
+              "Received unexpected data type on bleConnectionStateEventChannel: ${event.runtimeType}",
+            );
+          }
+        })
+        .asBroadcastStream();
     return _bleConnectionStateStream!;
   }
 
@@ -403,18 +413,20 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
   /// Returns a [Stream] of `List<BleDiscoveredDevice>`.
   @override
   Stream<List<BleDiscoveredDevice>> streamBleScanResult() {
-    _bleScanResultStream ??=
-        bleScanResultEventChannel.receiveBroadcastStream().map((dynamic event) {
+    _bleScanResultStream ??= bleScanResultEventChannel.receiveBroadcastStream().map((
+      dynamic event,
+    ) {
       // Expecting a List from the platform channel
       if (event is List) {
         try {
           return event
               .whereType<
-                  Map<dynamic,
-                      dynamic>>() // Filter out any non-map elements defensively
+                Map<dynamic, dynamic>
+              >() // Filter out any non-map elements defensively
               .map(
                 (deviceMap) => BleDiscoveredDevice.fromMap(
-                    Map<dynamic, dynamic>.from(deviceMap)),
+                  Map<dynamic, dynamic>.from(deviceMap),
+                ),
               )
               .toList();
         } catch (e) {
@@ -445,9 +457,9 @@ class MethodChannelFlutterP2pConnection extends FlutterP2pConnectionPlatform {
   /// Returns a [Stream] of [BleReceivedData].
   @override
   Stream<BleReceivedData> streamBleReceivedData() {
-    _bleReceivedDataStream ??= bleReceivedDataEventChannel
-        .receiveBroadcastStream()
-        .map((dynamic event) {
+    _bleReceivedDataStream ??= bleReceivedDataEventChannel.receiveBroadcastStream().map((
+      dynamic event,
+    ) {
       if (event is Map) {
         try {
           return BleReceivedData.fromMap(Map.from(event));

@@ -100,14 +100,8 @@ class _ScannerPageState extends State<ScannerPage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('scanner'),
-      ),
-      body: Center(
-        child: MobileScanner(
-          controller: controller,
-        ),
-      ),
+      appBar: AppBar(title: const Text('scanner')),
+      body: Center(child: MobileScanner(controller: controller)),
     );
   }
 }

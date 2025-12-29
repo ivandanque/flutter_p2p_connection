@@ -34,7 +34,7 @@ class P2pTransportHost with FileRequestServerMixin {
   final StreamController<String> _receivedTextController =
       StreamController<String>.broadcast();
   final StreamController<({String senderId, String text})>
-      _receivedTextWithSenderController =
+  _receivedTextWithSenderController =
       StreamController<({String senderId, String text})>.broadcast();
 
   static const String _logPrefix = "P2P Transport Host";
@@ -81,8 +81,11 @@ class P2pTransportHost with FileRequestServerMixin {
     int port = defaultPort;
     while (attempts < 10) {
       try {
-        _server =
-            await HttpServer.bind(InternetAddress.anyIPv4, port, shared: true);
+        _server = await HttpServer.bind(
+          InternetAddress.anyIPv4,
+          port,
+          shared: true,
+        );
         _server!.idleTimeout =
             null; // Disable idleTimeout to avoid disconnection when idle
         _portInUse = port;
@@ -124,8 +127,9 @@ class P2pTransportHost with FileRequestServerMixin {
         if (path == '/connect' &&
             WebSocketTransformer.isUpgradeRequest(request)) {
           try {
-            final WebSocket websocket =
-                await WebSocketTransformer.upgrade(request);
+            final WebSocket websocket = await WebSocketTransformer.upgrade(
+              request,
+            );
             websocket.pingInterval = const Duration(
               seconds: 5,
             ); // Set ping interval to avoid disconnection when idle
@@ -165,8 +169,11 @@ class P2pTransportHost with FileRequestServerMixin {
         request.uri.queryParameters['id'] ?? client.hashCode.toString();
     final clientUsername =
         request.uri.queryParameters['username'] ?? 'User_$clientId';
-    final clientInfo =
-        P2pClientInfo(id: clientId, username: clientUsername, isHost: false);
+    final clientInfo = P2pClientInfo(
+      id: clientId,
+      username: clientUsername,
+      isHost: false,
+    );
     _clients[clientId] = (socket: client, info: clientInfo);
     _broadcastClientListUpdate();
 
@@ -178,8 +185,9 @@ class P2pTransportHost with FileRequestServerMixin {
             case P2pMessageType.payload:
               if (message.payload is P2pMessagePayload) {
                 final payload = message.payload as P2pMessagePayload;
-                final bool hostIsRecipient =
-                    message.clients.any((c) => c.id == hostId);
+                final bool hostIsRecipient = message.clients.any(
+                  (c) => c.id == hostId,
+                );
                 if (hostIsRecipient) {
                   if (payload.files.isNotEmpty) {
                     for (var fileInfo in payload.files) {
@@ -189,8 +197,9 @@ class P2pTransportHost with FileRequestServerMixin {
                         );
                         continue;
                       }
-                      _receivableFiles[fileInfo.id] =
-                          ReceivableFileInfo(info: fileInfo);
+                      _receivableFiles[fileInfo.id] = ReceivableFileInfo(
+                        info: fileInfo,
+                      );
                       debugPrint(
                         "$_logPrefix [$username]: Added receivable file: ${fileInfo.name} (ID: ${fileInfo.id}) from ${clientInfo.username}",
                       );
@@ -201,8 +210,10 @@ class P2pTransportHost with FileRequestServerMixin {
                       _receivedTextController.add(payload.text);
                     }
                     if (!_receivedTextWithSenderController.isClosed) {
-                      _receivedTextWithSenderController
-                          .add((senderId: clientId, text: payload.text));
+                      _receivedTextWithSenderController.add((
+                        senderId: clientId,
+                        text: payload.text,
+                      ));
                     }
                   }
                 }
@@ -224,8 +235,9 @@ class P2pTransportHost with FileRequestServerMixin {
               break;
             case P2pMessageType.fileProgressUpdate:
               if (message.payload is P2pFileProgressUpdate) {
-                final bool hostIsRecipient =
-                    message.clients.any((c) => c.id == hostId);
+                final bool hostIsRecipient = message.clients.any(
+                  (c) => c.id == hostId,
+                );
                 if (hostIsRecipient) {
                   _handleFileProgressUpdate(
                     message.payload as P2pFileProgressUpdate,
@@ -305,8 +317,11 @@ class P2pTransportHost with FileRequestServerMixin {
   }
 
   void _broadcastClientListUpdate() {
-    final hostInfo =
-        P2pClientInfo(id: hostId, username: username, isHost: true);
+    final hostInfo = P2pClientInfo(
+      id: hostId,
+      username: username,
+      isHost: true,
+    );
     final clientListInfo = _clients.values.map((c) => c.info).toList();
     final fullListWithHost = [hostInfo, ...clientListInfo];
     broadcast(
@@ -485,8 +500,10 @@ class P2pTransportHost with FileRequestServerMixin {
 
       void reportProgress() {
         if (totalBytes > 0) {
-          final double percent =
-              max(0.0, min(100.0, (bytesReceived / totalBytes) * 100.0));
+          final double percent = max(
+            0.0,
+            min(100.0, (bytesReceived / totalBytes) * 100.0),
+          );
           receivable.downloadProgressPercent = percent;
           onProgress?.call(
             FileDownloadProgressUpdate(
@@ -581,11 +598,7 @@ class P2pTransportHost with FileRequestServerMixin {
       type: P2pMessageType.fileProgressUpdate,
       payload: progressPayload,
       clients: [
-        P2pClientInfo(
-          id: originalSenderId,
-          username: "unknown",
-          isHost: false,
-        ),
+        P2pClientInfo(id: originalSenderId, username: "unknown", isHost: false),
       ],
     ); // Only need ID for target
     await sendToClient(originalSenderId, message);
@@ -614,7 +627,7 @@ class P2pTransportHost with FileRequestServerMixin {
     _clients.forEach((clientId, clientData) {
       final bool shouldSend =
           (excludeClientIds == null || !excludeClientIds.contains(clientId)) &&
-              (includeClientIds == null || includeClientIds.contains(clientId));
+          (includeClientIds == null || includeClientIds.contains(clientId));
       if (shouldSend && clientData.socket.readyState == WebSocket.open) {
         try {
           clientData.socket.add(msgString);

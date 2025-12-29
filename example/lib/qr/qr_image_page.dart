@@ -6,10 +6,7 @@ import 'package:pretty_qr_code/pretty_qr_code.dart';
 
 class QrImagePage extends StatefulWidget {
   final HotspotHostState? hotspotState;
-  const QrImagePage({
-    super.key,
-    required this.hotspotState,
-  });
+  const QrImagePage({super.key, required this.hotspotState});
 
   @override
   State<QrImagePage> createState() => _QrImagePageState();
@@ -36,15 +33,10 @@ class _QrImagePageState extends State<QrImagePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('qr image'),
-      ),
+      appBar: AppBar(title: const Text('qr image')),
       body: Center(
         child: qrImage != null
-            ? SizedBox(
-                width: 300,
-                child: PrettyQrView(qrImage: qrImage!),
-              )
+            ? SizedBox(width: 300, child: PrettyQrView(qrImage: qrImage!))
             : const Text("no qr code"),
       ),
     );

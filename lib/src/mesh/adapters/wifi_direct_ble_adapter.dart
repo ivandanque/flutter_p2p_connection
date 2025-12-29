@@ -26,8 +26,7 @@ class WifiDirectBleAdapter extends MeshTransportAdapter
   MeshTransportType get transportType => MeshTransportType.wifiDirect;
 
   @override
-  Future<bool> get isAvailable async =>
-      true; // Wi-Fi Direct is broadly available
+  Future<bool> get isAvailable async => true; // Wi-Fi Direct is broadly available
 
   @override
   bool get isActive => _isHostActive || _isClientActive;
@@ -52,7 +51,7 @@ class WifiDirectBleAdapter extends MeshTransportAdapter
   final StreamController<MeshPeer> _peerStateController =
       StreamController<MeshPeer>.broadcast();
   final StreamController<({String peerId, String data})>
-      _incomingMessagesController = StreamController.broadcast();
+  _incomingMessagesController = StreamController.broadcast();
 
   final Map<String, (String ssid, String psk)> _credentialsByDevice = {};
   bool _isInitialized = false;
@@ -74,8 +73,8 @@ class WifiDirectBleAdapter extends MeshTransportAdapter
     _bleDataSub = FlutterP2pConnectionPlatform.instance
         .streamBleReceivedData()
         .listen((data) {
-      _tryParseCredentials(data.deviceAddress, data.data);
-    });
+          _tryParseCredentials(data.deviceAddress, data.data);
+        });
 
     _isInitialized = true;
   }
@@ -112,8 +111,10 @@ class WifiDirectBleAdapter extends MeshTransportAdapter
 
     // Forward received text payloads into mesh incoming messages with sender ID
     _hostTextSub = _host.streamReceivedMessages().listen((event) {
-      _incomingMessagesController
-          .add((peerId: event.senderId, data: event.text));
+      _incomingMessagesController.add((
+        peerId: event.senderId,
+        data: event.text,
+      ));
     });
 
     // Announce self as discovered (GO)
@@ -153,8 +154,10 @@ class WifiDirectBleAdapter extends MeshTransportAdapter
     _isClientActive = true;
 
     _clientTextSub = _client.streamReceivedMessages().listen((event) {
-      _incomingMessagesController
-          .add((peerId: event.senderId, data: event.text));
+      _incomingMessagesController.add((
+        peerId: event.senderId,
+        data: event.text,
+      ));
     });
 
     final peer = MeshPeer(

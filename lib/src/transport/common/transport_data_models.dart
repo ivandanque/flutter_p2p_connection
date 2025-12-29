@@ -34,10 +34,10 @@ class P2pClientInfo {
 
   /// Converts this [P2pClientInfo] instance to a JSON map.
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'username': username,
-        'isHost': isHost,
-      };
+    'id': id,
+    'username': username,
+    'isHost': isHost,
+  };
 
   @override
   String toString() =>
@@ -104,14 +104,14 @@ class P2pFileInfo {
 
   /// Converts this [P2pFileInfo] instance to a JSON map.
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'size': size,
-        'senderId': senderId,
-        'senderHostIp': senderHostIp,
-        'senderPort': senderPort,
-        'metadata': metadata,
-      };
+    'id': id,
+    'name': name,
+    'size': size,
+    'senderId': senderId,
+    'senderHostIp': senderHostIp,
+    'senderPort': senderPort,
+    'metadata': metadata,
+  };
 
   @override
   String toString() =>
@@ -172,17 +172,18 @@ class P2pMessagePayload {
 
   /// Converts this [P2pMessagePayload] instance to a JSON map.
   Map<String, dynamic> toJson() => {
-        'text': text,
-        'files': files.map((f) => f.toJson()).toList(),
-      };
+    'text': text,
+    'files': files.map((f) => f.toJson()).toList(),
+  };
 
   /// Converts this [P2pMessagePayload] instance to a JSON string.
   String toJsonString() => jsonEncode(toJson());
 
   @override
   String toString() {
-    final String textSummary =
-        text.length > 50 ? '${text.substring(0, 47)}...' : text;
+    final String textSummary = text.length > 50
+        ? '${text.substring(0, 47)}...'
+        : text;
     final String filesSummary = files.length > 2
         ? '${files.sublist(0, 2).map((f) => f.name)}... (${files.length} total)'
         : files.map((f) => f.name).toString();
@@ -249,11 +250,11 @@ class P2pFileProgressUpdate {
 
   /// Converts this [P2pFileProgressUpdate] instance to a JSON map.
   Map<String, dynamic> toJson() => {
-        'fileId': fileId,
-        'receiverId': receiverId,
-        'bytesDownloaded': bytesDownloaded,
-        'fileState': fileState.name,
-      };
+    'fileId': fileId,
+    'receiverId': receiverId,
+    'bytesDownloaded': bytesDownloaded,
+    'fileState': fileState.name,
+  };
 
   /// Converts this [P2pFileProgressUpdate] instance to a JSON string.
   String toJsonString() => jsonEncode(toJson());
@@ -310,8 +311,9 @@ class P2pMessage {
     dynamic payloadData;
     if (json['payload'] != null) {
       if (type == P2pMessageType.payload) {
-        payloadData =
-            P2pMessagePayload.fromJson(json['payload'] as Map<String, dynamic>);
+        payloadData = P2pMessagePayload.fromJson(
+          json['payload'] as Map<String, dynamic>,
+        );
       } else if (type == P2pMessageType.fileProgressUpdate) {
         payloadData = P2pFileProgressUpdate.fromJson(
           json['payload'] as Map<String, dynamic>,
@@ -346,15 +348,15 @@ class P2pMessage {
 
   /// Converts this [P2pMessage] instance to a JSON map.
   Map<String, dynamic> toJson() => {
-        'senderId': senderId,
-        'type': type.name,
-        'payload': switch (payload) {
-          final P2pMessagePayload p => p.toJson(),
-          final P2pFileProgressUpdate p => p.toJson(),
-          _ => null,
-        },
-        'clients': clients.map((c) => c.toJson()).toList(),
-      };
+    'senderId': senderId,
+    'type': type.name,
+    'payload': switch (payload) {
+      final P2pMessagePayload p => p.toJson(),
+      final P2pFileProgressUpdate p => p.toJson(),
+      _ => null,
+    },
+    'clients': clients.map((c) => c.toJson()).toList(),
+  };
 
   /// Converts this [P2pMessage] instance to a JSON string.
   String toJsonString() => jsonEncode(toJson());

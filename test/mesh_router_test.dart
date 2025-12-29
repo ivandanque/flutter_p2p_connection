@@ -218,10 +218,14 @@ void main() {
           ttl: defaultMeshTtl,
         );
 
-        final firstResult =
-            await router.processIncomingMessage(message, 'peer-1');
-        final secondResult =
-            await router.processIncomingMessage(message, 'peer-1');
+        final firstResult = await router.processIncomingMessage(
+          message,
+          'peer-1',
+        );
+        final secondResult = await router.processIncomingMessage(
+          message,
+          'peer-1',
+        );
 
         expect(firstResult, isTrue);
         expect(secondResult, isFalse);

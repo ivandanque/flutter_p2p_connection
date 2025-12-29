@@ -81,10 +81,10 @@ class HotspotClientState {
 
   /// The IP address of the gateway (usually the host device) in the hotspot network.
   final String?
-      hostGatewayIpAddress; // Host's Gateway IP (for WebSocket connection)
+  hostGatewayIpAddress; // Host's Gateway IP (for WebSocket connection)
   /// The IP address assigned to the client device within the hotspot network.
   final String?
-      hostIpAddress; // Client's own IP in the P2P group (for its file server)
+  hostIpAddress; // Client's own IP in the P2P group (for its file server)
 
   /// Creates a representation of the client's connection state.
   const HotspotClientState({
@@ -216,10 +216,7 @@ class BleDiscoveredDevice {
 
   /// Converts the [BleDiscoveredDevice] instance to a map.
   Map<String, dynamic> toMap() {
-    return {
-      'deviceAddress': deviceAddress,
-      'deviceName': deviceName,
-    };
+    return {'deviceAddress': deviceAddress, 'deviceName': deviceName};
   }
 
   @override

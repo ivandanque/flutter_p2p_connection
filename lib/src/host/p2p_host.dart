@@ -112,23 +112,25 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
 
     HotspotHostState state;
     try {
-      state = await streamHotspotState().firstWhere((s) {
-        if (s.isActive &&
-            s.ssid != null &&
-            s.preSharedKey != null &&
-            s.hostIpAddress != null) {
-          _lastKnownHotspotState = s; // Store the valid state
-          return true;
-        }
-        return false;
-      }).timeout(
-        timeout,
-        onTimeout: () {
-          throw TimeoutException(
-            'Host: Timed out after $timeout waiting for active hotspot state with IP.',
+      state = await streamHotspotState()
+          .firstWhere((s) {
+            if (s.isActive &&
+                s.ssid != null &&
+                s.preSharedKey != null &&
+                s.hostIpAddress != null) {
+              _lastKnownHotspotState = s; // Store the valid state
+              return true;
+            }
+            return false;
+          })
+          .timeout(
+            timeout,
+            onTimeout: () {
+              throw TimeoutException(
+                'Host: Timed out after $timeout waiting for active hotspot state with IP.',
+              );
+            },
           );
-        },
-      );
       debugPrint("Host: Received active state with IP: $state");
     } catch (e) {
       debugPrint("Host: Error waiting for hotspot state: $e");
@@ -166,7 +168,8 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
 
     _p2pTransport = P2pTransportHost(
       defaultPort: defaultP2pTransportPort,
-      username: username ??
+      username:
+          username ??
           await FlutterP2pConnectionPlatform.instance.getPlatformModel(),
     );
     try {
@@ -193,8 +196,8 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
       await FlutterP2pConnectionPlatform.instance
           .stopBleAdvertising()
           .catchError((Object e) {
-        debugPrint('Host: Error stopping BLE advertising: $e');
-      });
+            debugPrint('Host: Error stopping BLE advertising: $e');
+          });
       _isBleAdvertising = false;
     }
 
@@ -204,9 +207,9 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
     _p2pTransport = null;
 
     if (_isGroupCreated) {
-      await FlutterP2pConnectionPlatform.instance
-          .removeHotspot()
-          .catchError((Object e) {
+      await FlutterP2pConnectionPlatform.instance.removeHotspot().catchError((
+        Object e,
+      ) {
         debugPrint('Host: Error removing hotspot group natively: $e');
       });
       _isGroupCreated = false;
@@ -221,9 +224,9 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
   /// hotspot status, including whether it's active, its SSID, PSK, IP address,
   /// and any failure reasons.
   Stream<HotspotHostState> streamHotspotState() {
-    return FlutterP2pConnectionPlatform.instance
-        .streamHotspotInfo()
-        .map((state) {
+    return FlutterP2pConnectionPlatform.instance.streamHotspotInfo().map((
+      state,
+    ) {
       if (state.isActive && state.hostIpAddress != null) {
         _lastKnownHotspotState = state; // Keep track of the latest good state
       } else if (!state.isActive && _lastKnownHotspotState?.isActive == true) {
@@ -310,8 +313,8 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
     final recipients = excludeClientIds == null || excludeClientIds.isEmpty
         ? null
         : transport.clientList
-            .where((client) => !excludeClientIds.contains(client.id))
-            .toList();
+              .where((client) => !excludeClientIds.contains(client.id))
+              .toList();
     return await transport.shareFile(
       file,
       actualSenderIp: _lastKnownHotspotState!.hostIpAddress!,
@@ -334,8 +337,9 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
     if (_lastKnownHotspotState?.hostIpAddress == null) {
       throw StateError('Host: Host IP address is unknown. Cannot share file.');
     }
-    final recipients =
-        transport.clientList.where((client) => client.id == clientId).toList();
+    final recipients = transport.clientList
+        .where((client) => client.id == clientId)
+        .toList();
     if (recipients.isEmpty) {
       debugPrint("Host: Client $clientId not found for sending file.");
       return null;
@@ -358,7 +362,8 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
     // Wait for transport to be initialized
     while (_p2pTransport == null) {
       await Future<void>.delayed(
-          const Duration(milliseconds: 100)); // Shorter delay
+        const Duration(milliseconds: 100),
+      ); // Shorter delay
     }
     yield* _p2pTransport!.receivedTextStream;
   }

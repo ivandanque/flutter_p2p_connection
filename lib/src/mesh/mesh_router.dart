@@ -9,10 +9,8 @@ import 'mesh_exceptions.dart';
 import 'mesh_models.dart';
 
 /// Callback type for message sending via transport.
-typedef SendMessageCallback = Future<void> Function(
-  String peerId,
-  MeshMessage message,
-);
+typedef SendMessageCallback =
+    Future<void> Function(String peerId, MeshMessage message);
 
 /// Manages routing, forwarding, and deduplication for the mesh network.
 ///
@@ -95,8 +93,9 @@ class MeshRouter {
     });
 
     _deduplicationCleanupTimer?.cancel();
-    _deduplicationCleanupTimer =
-        Timer.periodic(messageDeduplicationWindow, (_) {
+    _deduplicationCleanupTimer = Timer.periodic(messageDeduplicationWindow, (
+      _,
+    ) {
       _cleanupDeduplicationCache();
     });
 
@@ -258,7 +257,8 @@ class MeshRouter {
     }
 
     // 3. Forward if needed (broadcast or targeted to others, and TTL allows)
-    final shouldForward = message.canForward &&
+    final shouldForward =
+        message.canForward &&
         (message.isBroadcast ||
             message.targetIds.any((id) => id != localPeerId));
 
@@ -393,8 +393,9 @@ class MeshRouter {
       }
     } else {
       // Forward to next-hops for remaining targets (excluding us)
-      final remainingTargets =
-          forwardedMessage.targetIds.where((id) => id != localPeerId).toList();
+      final remainingTargets = forwardedMessage.targetIds
+          .where((id) => id != localPeerId)
+          .toList();
       final sentTo = <String>{};
 
       for (final targetId in remainingTargets) {
@@ -434,7 +435,8 @@ class MeshRouter {
 
   /// Cleans up old entries from the deduplication cache.
   void _cleanupDeduplicationCache() {
-    final cutoff = DateTime.now().millisecondsSinceEpoch -
+    final cutoff =
+        DateTime.now().millisecondsSinceEpoch -
         messageDeduplicationWindow.inMilliseconds;
 
     _seenMessages.removeWhere((_, timestamp) => timestamp < cutoff);

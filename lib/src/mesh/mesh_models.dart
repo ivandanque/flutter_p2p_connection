@@ -76,17 +76,17 @@ class MeshPeer {
 
   /// Converts this [MeshPeer] to a JSON map.
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'username': username,
-        'transportType': transportType.name,
-        'state': state.name,
-        'address': address,
-        'port': port,
-        'lastSeenAt': lastSeenAt,
-        'hopCount': hopCount,
-        'nextHopPeerId': nextHopPeerId,
-        'metadata': metadata,
-      };
+    'id': id,
+    'username': username,
+    'transportType': transportType.name,
+    'state': state.name,
+    'address': address,
+    'port': port,
+    'lastSeenAt': lastSeenAt,
+    'hopCount': hopCount,
+    'nextHopPeerId': nextHopPeerId,
+    'metadata': metadata,
+  };
 
   /// Creates a copy of this peer with updated fields.
   MeshPeer copyWith({
@@ -216,15 +216,15 @@ class MeshMessage {
 
   /// Converts this [MeshMessage] to a JSON map.
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'type': type.toJsonValue(),
-        'sourceId': sourceId,
-        'sourceUsername': sourceUsername,
-        'targetIds': targetIds,
-        'ttl': ttl,
-        'createdAt': createdAt,
-        'payload': payload,
-      };
+    'id': id,
+    'type': type.toJsonValue(),
+    'sourceId': sourceId,
+    'sourceUsername': sourceUsername,
+    'targetIds': targetIds,
+    'ttl': ttl,
+    'createdAt': createdAt,
+    'payload': payload,
+  };
 
   /// Converts this [MeshMessage] to a JSON string.
   String toJsonString() => jsonEncode(toJson());
@@ -296,10 +296,10 @@ class MeshDataPayload {
 
   /// Converts this [MeshDataPayload] to a JSON map.
   Map<String, dynamic> toJson() => {
-        'text': text,
-        'files': files.map((f) => f.toJson()).toList(),
-        'customData': customData,
-      };
+    'text': text,
+    'files': files.map((f) => f.toJson()).toList(),
+    'customData': customData,
+  };
 
   @override
   String toString() =>
@@ -378,16 +378,16 @@ class MeshFileInfo {
 
   /// Converts this [MeshFileInfo] to a JSON map.
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'size': size,
-        'mimeType': mimeType,
-        'sha256': sha256,
-        'hostPeerId': hostPeerId,
-        'chunkSize': chunkSize,
-        'totalChunks': totalChunks,
-        'metadata': metadata,
-      };
+    'id': id,
+    'name': name,
+    'size': size,
+    'mimeType': mimeType,
+    'sha256': sha256,
+    'hostPeerId': hostPeerId,
+    'chunkSize': chunkSize,
+    'totalChunks': totalChunks,
+    'metadata': metadata,
+  };
 
   @override
   String toString() =>
@@ -439,11 +439,11 @@ class MeshFileChunk {
 
   /// Converts this [MeshFileChunk] to a JSON map.
   Map<String, dynamic> toJson() => {
-        'fileId': fileId,
-        'chunkIndex': chunkIndex,
-        'crc32': crc32,
-        'data': base64Encode(data),
-      };
+    'fileId': fileId,
+    'chunkIndex': chunkIndex,
+    'crc32': crc32,
+    'data': base64Encode(data),
+  };
 
   @override
   String toString() =>
@@ -521,10 +521,7 @@ class MeshPeerAnnounce {
   final List<MeshPeer> knownPeers;
 
   /// Creates a [MeshPeerAnnounce] instance.
-  const MeshPeerAnnounce({
-    required this.peer,
-    this.knownPeers = const [],
-  });
+  const MeshPeerAnnounce({required this.peer, this.knownPeers = const []});
 
   /// Creates a [MeshPeerAnnounce] from a JSON map.
   factory MeshPeerAnnounce.fromJson(Map<String, dynamic> json) {
@@ -538,9 +535,9 @@ class MeshPeerAnnounce {
 
   /// Converts this [MeshPeerAnnounce] to a JSON map.
   Map<String, dynamic> toJson() => {
-        'peer': peer.toJson(),
-        'knownPeers': knownPeers.map((p) => p.toJson()).toList(),
-      };
+    'peer': peer.toJson(),
+    'knownPeers': knownPeers.map((p) => p.toJson()).toList(),
+  };
 
   @override
   String toString() =>

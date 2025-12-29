@@ -83,9 +83,9 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
   /// to release system resources.
   Future<void> dispose() async {
     await _p2pTransport?.dispose().catchError(
-          (Object e) =>
-              debugPrint("Client: Error disposing transport in dispose: $e"),
-        );
+      (Object e) =>
+          debugPrint("Client: Error disposing transport in dispose: $e"),
+    );
     _p2pTransport = null;
     _lastKnownClientState = null;
     await stopScan().catchError(
@@ -125,33 +125,36 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
     debugPrint("Client: Starting BLE scan...");
     _isScanning = true;
 
-    _scanStreamSub =
-        FlutterP2pConnectionPlatform.instance.streamBleScanResult().listen(
-      (devices) {
-        if (_isScanning) onData?.call(devices);
-      },
-      onError: (Object error) {
-        debugPrint("Client: BLE Scan stream error: $error");
-        onError?.call(error);
-        if (cancelOnError ?? false) {
-          stopScan(); // This will also set _isScanning to false and clean up
-        }
-      },
-      onDone: () {
-        debugPrint("Client: BLE Scan stream done (completed or cancelled).");
-        // This onDone is critical. It means the stream is finished.
-        // We must ensure our state reflects this.
-        _isScanning = false; // Mark as not scanning
-        _scanTimer?.cancel();
-        _scanTimer = null;
-        // The native scan should be stopped by the platform when the stream ends,
-        // or by our explicit call in stopScan if we initiated the end.
-        // Call user's onDone.
-        onDone?.call();
-        _scanStreamSub = null; // Clear the subscription reference
-      },
-      cancelOnError: cancelOnError,
-    );
+    _scanStreamSub = FlutterP2pConnectionPlatform.instance
+        .streamBleScanResult()
+        .listen(
+          (devices) {
+            if (_isScanning) onData?.call(devices);
+          },
+          onError: (Object error) {
+            debugPrint("Client: BLE Scan stream error: $error");
+            onError?.call(error);
+            if (cancelOnError ?? false) {
+              stopScan(); // This will also set _isScanning to false and clean up
+            }
+          },
+          onDone: () {
+            debugPrint(
+              "Client: BLE Scan stream done (completed or cancelled).",
+            );
+            // This onDone is critical. It means the stream is finished.
+            // We must ensure our state reflects this.
+            _isScanning = false; // Mark as not scanning
+            _scanTimer?.cancel();
+            _scanTimer = null;
+            // The native scan should be stopped by the platform when the stream ends,
+            // or by our explicit call in stopScan if we initiated the end.
+            // Call user's onDone.
+            onDone?.call();
+            _scanStreamSub = null; // Clear the subscription reference
+          },
+          cancelOnError: cancelOnError,
+        );
 
     _scanTimer = Timer(timeout, () {
       debugPrint("Client: Scan timeout reached. Stopping scan.");
@@ -199,9 +202,9 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
       debugPrint(
         "Client: No active scan stream subscription to cancel, ensuring native scan is stopped.",
       );
-      await FlutterP2pConnectionPlatform.instance
-          .stopBleScan()
-          .catchError((Object e) {
+      await FlutterP2pConnectionPlatform.instance.stopBleScan().catchError((
+        Object e,
+      ) {
         debugPrint(
           'Client: Error stopping BLE scan natively during explicit stopScan (no stream sub): $e',
         );
@@ -238,38 +241,41 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
     final completer = Completer<void>();
 
     try {
-      bleDataSub =
-          FlutterP2pConnectionPlatform.instance.streamBleReceivedData().listen(
-        (evt) {
-          if (evt.deviceAddress == deviceAddress) {
-            final String value = String.fromCharCodes(evt.data);
-            if (ssid == null) {
-              ssid = value;
-              debugPrint("Client: Received SSID via BLE: $ssid");
-            } else if (psk == null) {
-              psk = value;
-              debugPrint("Client: Received PSK via BLE (not logging value)");
-              if (!completer.isCompleted) completer.complete();
-            }
-          }
-        },
-        onError: (Object error) {
-          if (!completer.isCompleted) {
-            completer.completeError(
-              Exception('Client: Error receiving BLE data: $error'),
-            );
-          }
-        },
-        onDone: () {
-          if (!completer.isCompleted) {
-            completer.completeError(
-              Exception(
-                'Client: BLE data stream ended before receiving credentials.',
-              ),
-            );
-          }
-        },
-      );
+      bleDataSub = FlutterP2pConnectionPlatform.instance
+          .streamBleReceivedData()
+          .listen(
+            (evt) {
+              if (evt.deviceAddress == deviceAddress) {
+                final String value = String.fromCharCodes(evt.data);
+                if (ssid == null) {
+                  ssid = value;
+                  debugPrint("Client: Received SSID via BLE: $ssid");
+                } else if (psk == null) {
+                  psk = value;
+                  debugPrint(
+                    "Client: Received PSK via BLE (not logging value)",
+                  );
+                  if (!completer.isCompleted) completer.complete();
+                }
+              }
+            },
+            onError: (Object error) {
+              if (!completer.isCompleted) {
+                completer.completeError(
+                  Exception('Client: Error receiving BLE data: $error'),
+                );
+              }
+            },
+            onDone: () {
+              if (!completer.isCompleted) {
+                completer.completeError(
+                  Exception(
+                    'Client: BLE data stream ended before receiving credentials.',
+                  ),
+                );
+              }
+            },
+          );
 
       await completer.future.timeout(
         timeout,
@@ -297,10 +303,10 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
       await FlutterP2pConnectionPlatform.instance
           .disconnectBleDevice(deviceAddress)
           .catchError((Object e) {
-        debugPrint(
-          'Client: Error disconnecting from BLE device $deviceAddress: $e',
-        );
-      });
+            debugPrint(
+              'Client: Error disconnecting from BLE device $deviceAddress: $e',
+            );
+          });
       debugPrint("Client: Disconnected from BLE device $deviceAddress.");
     }
   }
@@ -322,8 +328,9 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
   Future<void> connectWithCredentials(
     String ssid,
     String psk, {
-    Duration timeout =
-        const Duration(seconds: 60), // Increased default for Wi-Fi connection
+    Duration timeout = const Duration(
+      seconds: 60,
+    ), // Increased default for Wi-Fi connection
   }) async {
     debugPrint("Client: Connecting to hotspot '$ssid'...");
     await _p2pTransport?.disconnect().catchError((Object e) {
@@ -338,23 +345,25 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
 
     HotspotClientState state;
     try {
-      state = await streamHotspotState().firstWhere((s) {
-        if (s.isActive &&
-            s.hostSsid == ssid &&
-            s.hostGatewayIpAddress != null &&
-            s.hostIpAddress != null) {
-          _lastKnownClientState = s; // Store the valid state
-          return true;
-        }
-        return false;
-      }).timeout(
-        timeout,
-        onTimeout: () {
-          throw TimeoutException(
-            'Client: Timed out after $timeout waiting for active connection state with gateway and client IP.',
+      state = await streamHotspotState()
+          .firstWhere((s) {
+            if (s.isActive &&
+                s.hostSsid == ssid &&
+                s.hostGatewayIpAddress != null &&
+                s.hostIpAddress != null) {
+              _lastKnownClientState = s; // Store the valid state
+              return true;
+            }
+            return false;
+          })
+          .timeout(
+            timeout,
+            onTimeout: () {
+              throw TimeoutException(
+                'Client: Timed out after $timeout waiting for active connection state with gateway and client IP.',
+              );
+            },
           );
-        },
-      );
       debugPrint("Client: Received active connection state: $state");
     } catch (e) {
       debugPrint("Client: Error waiting for connection state: $e");
@@ -370,7 +379,8 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
       hostIp: state.hostGatewayIpAddress!,
       defaultPort: defaultP2pTransportPort,
       defaultFilePort: defaultP2pTransportClientFileServerPort,
-      username: username ??
+      username:
+          username ??
           await FlutterP2pConnectionPlatform.instance.getPlatformModel(),
     );
     try {
@@ -404,8 +414,8 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
     await FlutterP2pConnectionPlatform.instance
         .disconnectFromHotspot()
         .catchError((Object e) {
-      debugPrint('Client: Error disconnecting from hotspot natively: $e');
-    });
+          debugPrint('Client: Error disconnecting from hotspot natively: $e');
+        });
     debugPrint("Client: Native hotspot disconnection process finished.");
   }
 
@@ -555,8 +565,9 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
         'Client: Client IP address in group is unknown. Cannot share file.',
       );
     }
-    final recipients =
-        transport.clientList.where((client) => client.id == clientId).toList();
+    final recipients = transport.clientList
+        .where((client) => client.id == clientId)
+        .toList();
     if (recipients.isEmpty) {
       debugPrint("Client: Target client $clientId not found for sending file.");
       return null;

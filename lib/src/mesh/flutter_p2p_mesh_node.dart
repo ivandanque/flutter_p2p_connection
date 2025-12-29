@@ -130,13 +130,13 @@ class FlutterP2pMeshNode {
 
   /// The local peer representation.
   MeshPeer get localPeer => MeshPeer(
-        id: peerId,
-        username: config.username,
-        transportType: MeshTransportType.unknown,
-        state: MeshPeerState.connected,
-        lastSeenAt: DateTime.now().millisecondsSinceEpoch,
-        hopCount: 0,
-      );
+    id: peerId,
+    username: config.username,
+    transportType: MeshTransportType.unknown,
+    state: MeshPeerState.connected,
+    lastSeenAt: DateTime.now().millisecondsSinceEpoch,
+    hopCount: 0,
+  );
 
   /// Creates a [FlutterP2pMeshNode] instance.
   ///
@@ -436,25 +436,27 @@ class FlutterP2pMeshNode {
     final key = adapter.transportType.name;
 
     // Discovered peers
-    _adapterSubscriptions['${key}_discovered'] =
-        adapter.discoveredPeers.listen((peer) {
-      debugPrint(
-        '$_logPrefix [${config.username}]: Discovered peer ${peer.username}',
-      );
+    _adapterSubscriptions['${key}_discovered'] = adapter.discoveredPeers.listen(
+      (peer) {
+        debugPrint(
+          '$_logPrefix [${config.username}]: Discovered peer ${peer.username}',
+        );
 
-      if (!_peerController.isClosed) {
-        _peerController.add(peer);
-      }
+        if (!_peerController.isClosed) {
+          _peerController.add(peer);
+        }
 
-      // Auto-connect if enabled
-      if (config.autoConnect) {
-        _autoConnectToPeer(peer, adapter);
-      }
-    });
+        // Auto-connect if enabled
+        if (config.autoConnect) {
+          _autoConnectToPeer(peer, adapter);
+        }
+      },
+    );
 
     // Peer state changes
-    _adapterSubscriptions['${key}_state'] =
-        adapter.peerStateChanges.listen((peer) {
+    _adapterSubscriptions['${key}_state'] = adapter.peerStateChanges.listen((
+      peer,
+    ) {
       if (peer.state == MeshPeerState.connected) {
         _router?.addDirectPeer(peer);
       } else if (peer.state == MeshPeerState.disconnected) {
@@ -467,8 +469,9 @@ class FlutterP2pMeshNode {
     });
 
     // Incoming messages
-    _adapterSubscriptions['${key}_messages'] =
-        adapter.incomingMessages.listen((data) {
+    _adapterSubscriptions['${key}_messages'] = adapter.incomingMessages.listen((
+      data,
+    ) {
       _handleRawMessage(data.peerId, data.data);
     });
   }
@@ -534,8 +537,9 @@ class FlutterP2pMeshNode {
   /// Handles peer announcement messages.
   void _handlePeerAnnounce(MeshMessage message) {
     try {
-      final announce =
-          MeshPeerAnnounce.fromJson(message.payload as Map<String, dynamic>);
+      final announce = MeshPeerAnnounce.fromJson(
+        message.payload as Map<String, dynamic>,
+      );
 
       // Find who we received this from (direct peer)
       final fromPeerId = _router?.directPeers

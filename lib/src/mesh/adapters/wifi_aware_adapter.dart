@@ -219,8 +219,9 @@ class WifiAwareAdapter extends MeshTransportAdapter
 
       final peer = connectedPeersMap[peerId];
       if (peer != null) {
-        final disconnectedPeer =
-            peer.copyWith(state: MeshPeerState.disconnected);
+        final disconnectedPeer = peer.copyWith(
+          state: MeshPeerState.disconnected,
+        );
         removeConnectedPeer(peerId);
 
         if (!_peerStateController.isClosed) {
@@ -331,8 +332,9 @@ class WifiAwareAdapter extends MeshTransportAdapter
     removeDiscoveredPeer(peerId);
 
     if (peer != null && !_peerStateController.isClosed) {
-      _peerStateController
-          .add(peer.copyWith(state: MeshPeerState.disconnected));
+      _peerStateController.add(
+        peer.copyWith(state: MeshPeerState.disconnected),
+      );
     }
 
     debugPrint('$_logPrefix: Lost peer $peerId');

@@ -191,7 +191,7 @@ void main() {
             'mimeType': 'image/jpeg',
             'hostPeerId': 'peer-123',
             'totalChunks': 16,
-          }
+          },
         ],
         'customData': {'key': 'value'},
       };
@@ -274,10 +274,7 @@ void main() {
         hopCount: 1,
       );
 
-      const announce = MeshPeerAnnounce(
-        peer: peer,
-        knownPeers: [knownPeer],
-      );
+      const announce = MeshPeerAnnounce(peer: peer, knownPeers: [knownPeer]);
 
       final json = announce.toJson();
       final restored = MeshPeerAnnounce.fromJson(json);

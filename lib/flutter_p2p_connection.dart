@@ -26,7 +26,7 @@
 ///
 /// await meshNode.broadcast(text: 'Hello, mesh!');
 /// ```
-library flutter_p2p_connection;
+library;
 
 // Export common P2P functionalities (Host and Client)
 export 'src/host/p2p_host.dart' show FlutterP2pHost;

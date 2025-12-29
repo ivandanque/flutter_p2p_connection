@@ -11,9 +11,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: MyHomePage(),
-    );
+    return const MaterialApp(home: MyHomePage());
   }
 }
 
@@ -28,9 +26,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Flutter p2p connection plugin'),
-      ),
+      appBar: AppBar(title: const Text('Flutter p2p connection plugin')),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Column(
@@ -43,9 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const HostPage(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const HostPage()),
                 );
               },
               child: Container(
@@ -58,10 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: const Center(
                   child: Text(
                     'HOST',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 30,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 30),
                   ),
                 ),
               ),
@@ -73,9 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const ClientPage(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const ClientPage()),
                 );
               },
               child: Container(
@@ -88,10 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: const Center(
                   child: Text(
                     'CLIENT',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 30,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 30),
                   ),
                 ),
               ),

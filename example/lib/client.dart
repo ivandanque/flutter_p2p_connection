@@ -51,10 +51,7 @@ class _ClientPageState extends State<ClientPage> {
 
   void snack(String msg) async {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(seconds: 2),
-        content: Text(msg),
-      ),
+      SnackBar(duration: const Duration(seconds: 2), content: Text(msg)),
     );
   }
 
@@ -243,7 +240,9 @@ class _ClientPageState extends State<ClientPage> {
   void startFileDownload(ReceivableFileInfo file) async {
     snack("Downloading ${file.info.name}...");
     var downloaded = await p2pInterface.downloadFile(
-        file.info.id, '/storage/emulated/0/Download/');
+      file.info.id,
+      '/storage/emulated/0/Download/',
+    );
     snack("${file.info.name} download: $downloaded");
   }
 
@@ -277,7 +276,7 @@ class _ClientPageState extends State<ClientPage> {
             icon: const Icon(Icons.settings_applications),
             onPressed: _showPermissionsDialog,
             tooltip: "Permissions & Services",
-          )
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -285,244 +284,228 @@ class _ClientPageState extends State<ClientPage> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            _buildSection(
-              "Connection Status",
-              [
-                Text(
-                  isConnected
-                      ? "Connected to: ${hotspotState?.hostSsid ?? 'Unknown'}"
-                      : "Not Connected",
-                  style: TextStyle(
-                      color: isConnected ? Colors.green : Colors.red,
-                      fontSize: 16),
+            _buildSection("Connection Status", [
+              Text(
+                isConnected
+                    ? "Connected to: ${hotspotState?.hostSsid ?? 'Unknown'}"
+                    : "Not Connected",
+                style: TextStyle(
+                  color: isConnected ? Colors.green : Colors.red,
+                  fontSize: 16,
                 ),
-                if (isConnected && hotspotState?.hostGatewayIpAddress != null)
-                  Text("Host IP: ${hotspotState!.hostGatewayIpAddress!}"),
-                if (isConnected && hotspotState?.hostIpAddress != null)
-                  Text("My IP: ${hotspotState!.hostIpAddress!}"),
-              ],
-            ),
-            _buildSection(
-              "Connect to Host",
-              [
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 4.0,
-                  children: [
-                    ElevatedButton.icon(
-                      icon: _isDiscovering
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Icon(Icons.bluetooth_searching),
-                      label: Text(_isDiscovering
+              ),
+              if (isConnected && hotspotState?.hostGatewayIpAddress != null)
+                Text("Host IP: ${hotspotState!.hostGatewayIpAddress!}"),
+              if (isConnected && hotspotState?.hostIpAddress != null)
+                Text("My IP: ${hotspotState!.hostIpAddress!}"),
+            ]),
+            _buildSection("Connect to Host", [
+              Wrap(
+                spacing: 8.0,
+                runSpacing: 4.0,
+                children: [
+                  ElevatedButton.icon(
+                    icon: _isDiscovering
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.bluetooth_searching),
+                    label: Text(
+                      _isDiscovering
                           ? "Discovering... (${discoveredDevices.length})"
-                          : "Discover (BLE)"),
-                      onPressed: !isConnected && !_isDiscovering
-                          ? startPeerDiscovery
-                          : null,
+                          : "Discover (BLE)",
                     ),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.qr_code_scanner),
-                      label: const Text("Scan QR"),
-                      onPressed: !isConnected
-                          ? () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ScannerPage(
-                                    onScanned: connectWithCredentials,
-                                  ),
+                    onPressed: !isConnected && !_isDiscovering
+                        ? startPeerDiscovery
+                        : null,
+                  ),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.qr_code_scanner),
+                    label: const Text("Scan QR"),
+                    onPressed: !isConnected
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ScannerPage(
+                                  onScanned: connectWithCredentials,
                                 ),
-                              );
-                            }
-                          : null,
-                    ),
-                    if (isConnected)
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.link_off),
-                        label: const Text("Disconnect"),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange),
-                        onPressed: disconnect,
+                              ),
+                            );
+                          }
+                        : null,
+                  ),
+                  if (isConnected)
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.link_off),
+                      label: const Text("Disconnect"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
                       ),
-                  ],
-                ),
-              ],
-            ),
+                      onPressed: disconnect,
+                    ),
+                ],
+              ),
+            ]),
             if (discoveredDevices.isNotEmpty && !isConnected)
-              _buildSection(
-                "Discovered Hosts",
-                [
-                  SizedBox(
-                    height: 150,
-                    child: ListView.builder(
-                      itemCount: discoveredDevices.length,
-                      itemBuilder: (context, index) => Card(
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                        child: ListTile(
-                          title: Text(discoveredDevices[index].deviceName),
-                          subtitle:
-                              Text(discoveredDevices[index].deviceAddress),
-                          trailing: ElevatedButton(
-                            onPressed: () =>
-                                connectWithDevice(discoveredDevices[index]),
-                            child: const Text("Connect"),
-                          ),
+              _buildSection("Discovered Hosts", [
+                SizedBox(
+                  height: 150,
+                  child: ListView.builder(
+                    itemCount: discoveredDevices.length,
+                    itemBuilder: (context, index) => Card(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      child: ListTile(
+                        title: Text(discoveredDevices[index].deviceName),
+                        subtitle: Text(discoveredDevices[index].deviceAddress),
+                        trailing: ElevatedButton(
+                          onPressed: () =>
+                              connectWithDevice(discoveredDevices[index]),
+                          child: const Text("Connect"),
                         ),
                       ),
                     ),
                   ),
-                ],
+                ),
+              ]),
+            _buildSection("Participants", [
+              StreamBuilder<List<P2pClientInfo>>(
+                stream: p2pInterface.streamClientList(),
+                builder: (context, snapshot) {
+                  var clientList = snapshot.data ?? [];
+                  if (clientList.isEmpty) {
+                    return const Text("No other participants yet.");
+                  }
+                  return SizedBox(
+                    height: 100,
+                    child: ListView.builder(
+                      itemCount: clientList.length,
+                      itemBuilder: (context, index) => ListTile(
+                        title: Text(clientList[index].username),
+                        subtitle: Text('Host: ${clientList[index].isHost}'),
+                      ),
+                    ),
+                  );
+                },
               ),
-            _buildSection(
-              "Participants",
-              [
-                StreamBuilder<List<P2pClientInfo>>(
-                  stream: p2pInterface.streamClientList(),
-                  builder: (context, snapshot) {
-                    var clientList = snapshot.data ?? [];
-                    if (clientList.isEmpty) {
-                      return const Text("No other participants yet.");
-                    }
-                    return SizedBox(
-                      height: 100,
-                      child: ListView.builder(
-                        itemCount: clientList.length,
-                        itemBuilder: (context, index) => ListTile(
-                          title: Text(clientList[index].username),
-                          subtitle: Text('Host: ${clientList[index].isHost}'),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            _buildSection(
-              "Send Message",
-              [
-                TextField(
-                  controller: textEditingController,
-                  decoration: const InputDecoration(hintText: 'Enter message'),
-                  enabled: isConnected,
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.send),
-                  label: const Text('Send Text'),
-                  onPressed: isConnected ? sendMessage : null,
-                ),
-              ],
-            ),
-            _buildSection(
-              "Send File",
-              [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.attach_file),
-                  label: const Text('Select & Send File'),
-                  style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                  onPressed: isConnected ? sendFile : null,
-                ),
-              ],
-            ),
-            _buildSection(
-              "Received Files",
-              [
-                StreamBuilder<List<ReceivableFileInfo>>(
-                  stream: p2pInterface.streamReceivedFilesInfo(),
-                  builder: (context, snapshot) {
-                    var receivedFiles = snapshot.data ?? [];
-                    if (receivedFiles.isEmpty) {
-                      return const Text("No files received yet.");
-                    }
-                    return SizedBox(
-                      height: 200,
-                      child: ListView.builder(
-                        itemCount: receivedFiles.length,
-                        itemBuilder: (context, index) {
-                          var file = receivedFiles[index];
-                          var percent = file.downloadProgressPercent.round();
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 4),
-                            child: ListTile(
-                              title: Text(file.info.name),
-                              subtitle:
-                                  Text("Status: ${file.state.name}, $percent%"),
-                              trailing: file.state == ReceivableFileState.idle
-                                  ? ElevatedButton(
-                                      onPressed: () => startFileDownload(file),
-                                      child: const Text('Download'),
-                                    )
-                                  : (file.state ==
-                                          ReceivableFileState.downloading
-                                      ? const CircularProgressIndicator()
-                                      : (file.state ==
-                                              ReceivableFileState.completed
-                                          ? const Icon(Icons.check_circle,
-                                              color: Colors.green)
-                                          : ElevatedButton(
-                                              onPressed: () =>
-                                                  startFileDownload(file),
-                                              child: const Icon(Icons.error,
-                                                  color: Colors.red),
-                                            ))),
+            ]),
+            _buildSection("Send Message", [
+              TextField(
+                controller: textEditingController,
+                decoration: const InputDecoration(hintText: 'Enter message'),
+                enabled: isConnected,
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.send),
+                label: const Text('Send Text'),
+                onPressed: isConnected ? sendMessage : null,
+              ),
+            ]),
+            _buildSection("Send File", [
+              ElevatedButton.icon(
+                icon: const Icon(Icons.attach_file),
+                label: const Text('Select & Send File'),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                onPressed: isConnected ? sendFile : null,
+              ),
+            ]),
+            _buildSection("Received Files", [
+              StreamBuilder<List<ReceivableFileInfo>>(
+                stream: p2pInterface.streamReceivedFilesInfo(),
+                builder: (context, snapshot) {
+                  var receivedFiles = snapshot.data ?? [];
+                  if (receivedFiles.isEmpty) {
+                    return const Text("No files received yet.");
+                  }
+                  return SizedBox(
+                    height: 200,
+                    child: ListView.builder(
+                      itemCount: receivedFiles.length,
+                      itemBuilder: (context, index) {
+                        var file = receivedFiles[index];
+                        var percent = file.downloadProgressPercent.round();
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          child: ListTile(
+                            title: Text(file.info.name),
+                            subtitle: Text(
+                              "Status: ${file.state.name}, $percent%",
                             ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            _buildSection(
-              "Sent Files Status",
-              [
-                StreamBuilder<List<HostedFileInfo>>(
-                  stream: p2pInterface.streamSentFilesInfo(),
-                  builder: (context, snapshot) {
-                    var sentFiles = snapshot.data ?? [];
-                    if (sentFiles.isEmpty) {
-                      return const Text("No files sent yet.");
-                    }
-                    return SizedBox(
-                      height: 200,
-                      child: ListView.builder(
-                        itemCount: sentFiles.length,
-                        itemBuilder: (context, index) {
-                          var file = sentFiles[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 4),
-                            child: ListTile(
-                              title: Text(file.info.name),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: file.receiverIds.map((id) {
-                                  P2pClientInfo? receiverInfo;
-                                  try {
-                                    receiverInfo = p2pInterface.clientList
-                                        .firstWhere((c) => c.id == id);
-                                  } catch (_) {}
-                                  var name = receiverInfo?.username ??
-                                      id.substring(0, min(8, id.length));
-                                  var percent =
-                                      file.getProgressPercent(id).round();
-                                  return Text(
-                                      "$name: ${file.state.name}, $percent%");
-                                }).toList(),
-                              ),
+                            trailing: file.state == ReceivableFileState.idle
+                                ? ElevatedButton(
+                                    onPressed: () => startFileDownload(file),
+                                    child: const Text('Download'),
+                                  )
+                                : (file.state == ReceivableFileState.downloading
+                                    ? const CircularProgressIndicator()
+                                    : (file.state ==
+                                            ReceivableFileState.completed
+                                        ? const Icon(
+                                            Icons.check_circle,
+                                            color: Colors.green,
+                                          )
+                                        : ElevatedButton(
+                                            onPressed: () =>
+                                                startFileDownload(file),
+                                            child: const Icon(
+                                              Icons.error,
+                                              color: Colors.red,
+                                            ),
+                                          ))),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ]),
+            _buildSection("Sent Files Status", [
+              StreamBuilder<List<HostedFileInfo>>(
+                stream: p2pInterface.streamSentFilesInfo(),
+                builder: (context, snapshot) {
+                  var sentFiles = snapshot.data ?? [];
+                  if (sentFiles.isEmpty) {
+                    return const Text("No files sent yet.");
+                  }
+                  return SizedBox(
+                    height: 200,
+                    child: ListView.builder(
+                      itemCount: sentFiles.length,
+                      itemBuilder: (context, index) {
+                        var file = sentFiles[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          child: ListTile(
+                            title: Text(file.info.name),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: file.receiverIds.map((id) {
+                                P2pClientInfo? receiverInfo;
+                                try {
+                                  receiverInfo = p2pInterface.clientList
+                                      .firstWhere((c) => c.id == id);
+                                } catch (_) {}
+                                var name = receiverInfo?.username ??
+                                    id.substring(0, min(8, id.length));
+                                var percent =
+                                    file.getProgressPercent(id).round();
+                                return Text(
+                                  "$name: ${file.state.name}, $percent%",
+                                );
+                              }).toList(),
                             ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ]),
           ],
         ),
       ),

@@ -45,7 +45,7 @@ class P2pTransportClient with FileRequestServerMixin {
   final StreamController<String> _receivedTextController =
       StreamController<String>.broadcast();
   final StreamController<({String senderId, String text})>
-      _receivedTextWithSenderController =
+  _receivedTextWithSenderController =
       StreamController<({String senderId, String text})>.broadcast();
 
   static const String _logPrefix = "P2P Transport Client";
@@ -107,8 +107,11 @@ class P2pTransportClient with FileRequestServerMixin {
     int port = defaultFilePort;
     while (attempts < 10) {
       try {
-        _fileServer =
-            await HttpServer.bind(InternetAddress.anyIPv4, port, shared: true);
+        _fileServer = await HttpServer.bind(
+          InternetAddress.anyIPv4,
+          port,
+          shared: true,
+        );
         _fileServer!.idleTimeout =
             null; // Disable idleTimeout to avoid disconnection when idle
         _fileServerPortInUse = port;
@@ -235,8 +238,9 @@ class P2pTransportClient with FileRequestServerMixin {
         debugPrint(
           "$_logPrefix [$username]: Attempting WebSocket connect to $url...",
         );
-        tempSocket = await WebSocket.connect(url.toString())
-            .timeout(const Duration(seconds: 10));
+        tempSocket = await WebSocket.connect(
+          url.toString(),
+        ).timeout(const Duration(seconds: 10));
         tempSocket.pingInterval = const Duration(
           seconds: 5,
         ); // Set ping interval to avoid disconnection when idle
@@ -313,8 +317,9 @@ class P2pTransportClient with FileRequestServerMixin {
                       );
                       continue;
                     }
-                    _receivableFiles[fileInfo.id] =
-                        ReceivableFileInfo(info: fileInfo);
+                    _receivableFiles[fileInfo.id] = ReceivableFileInfo(
+                      info: fileInfo,
+                    );
                     debugPrint(
                       "$_logPrefix [$username]: Added receivable file: ${fileInfo.name} (ID: ${fileInfo.id}) from ${senderInfo.username}",
                     );
@@ -325,8 +330,10 @@ class P2pTransportClient with FileRequestServerMixin {
                     _receivedTextController.add(payload.text);
                   }
                   if (!_receivedTextWithSenderController.isClosed) {
-                    _receivedTextWithSenderController
-                        .add((senderId: message.senderId, text: payload.text));
+                    _receivedTextWithSenderController.add((
+                      senderId: message.senderId,
+                      text: payload.text,
+                    ));
                   }
                 }
               } else {
@@ -379,7 +386,8 @@ class P2pTransportClient with FileRequestServerMixin {
             "$_logPrefix [$username]: Attempting to reconnect (attempt $_connectionRetryAttempts/$_maxConnectionRetries)...",
           );
           await Future<void>.delayed(
-              Duration(seconds: 1 + _connectionRetryAttempts));
+            Duration(seconds: 1 + _connectionRetryAttempts),
+          );
           try {
             await connect();
           } catch (e) {
@@ -422,7 +430,8 @@ class P2pTransportClient with FileRequestServerMixin {
             "$_logPrefix [$username]: Attempting to reconnect due to error (attempt $_connectionRetryAttempts/$_maxConnectionRetries)...",
           );
           await Future<void>.delayed(
-              Duration(seconds: 1 + _connectionRetryAttempts));
+            Duration(seconds: 1 + _connectionRetryAttempts),
+          );
           try {
             await connect();
           } catch (e) {
@@ -651,8 +660,10 @@ class P2pTransportClient with FileRequestServerMixin {
 
       void reportProgress() {
         if (totalBytes > 0) {
-          final double percent =
-              max(0.0, min(100.0, (bytesReceived / totalBytes) * 100.0));
+          final double percent = max(
+            0.0,
+            min(100.0, (bytesReceived / totalBytes) * 100.0),
+          );
           receivable.downloadProgressPercent = percent;
           onProgress?.call(
             FileDownloadProgressUpdate(
@@ -767,9 +778,7 @@ class P2pTransportClient with FileRequestServerMixin {
       senderId: clientId,
       type: P2pMessageType.fileProgressUpdate,
       payload: progressPayload,
-      clients: [
-        targetClient,
-      ],
+      clients: [targetClient],
     ); // Send progress update intended for the original sender
     await send(message);
   }
