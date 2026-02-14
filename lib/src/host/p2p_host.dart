@@ -329,6 +329,44 @@ class FlutterP2pHost extends FlutterP2pConnectionBase {
   /// Returns a [Future] completing with [P2pFileInfo] if the file sharing is initiated,
   /// or `null` if the client is not found or on failure.
   /// Throws a [StateError] if P2P transport is not active or host IP is unknown.
+
+  /// Register a local file with the host's HTTP file server so it can be
+  /// downloaded at `/file?id=<fileId>` without broadcasting an announcement.
+  /// Returns the [P2pFileInfo] describing the hosted file, or `null` if
+  /// the transport is not active.
+  P2pFileInfo? registerHostedFile({
+    required String fileId,
+    required String fileName,
+    required String localPath,
+    required int fileSize,
+  }) {
+    final transport = _p2pTransport;
+    if (transport == null || transport.portInUse == null) {
+      return null;
+    }
+    final hostIp = _lastKnownHotspotState?.hostIpAddress;
+    if (hostIp == null) {
+      return null;
+    }
+
+    final info = P2pFileInfo(
+      id: fileId,
+      name: fileName,
+      size: fileSize,
+      senderId: transport.hostId,
+      senderHostIp: hostIp,
+      senderPort: transport.portInUse!,
+      metadata: const {'history_sync': 'true'},
+    );
+
+    transport.hostedFiles[fileId] = HostedFileInfo(
+      info: info,
+      localPath: localPath,
+      recipientIds: const [],
+    );
+    return info;
+  }
+
   Future<P2pFileInfo?> sendFileToClient(File file, String clientId) async {
     final transport = _p2pTransport;
     if (transport == null || transport.portInUse == null) {
