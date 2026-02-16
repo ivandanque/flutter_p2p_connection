@@ -194,8 +194,8 @@ class ClientManager(
                 mainHandler.post {
                     val connectionInfo = DataUtils.getClientConnectionInfo(connectivityManager, network)
                     val gatewayIp = connectionInfo?.get("gatewayIpAddress") as? String
-                    // For client, the host IP is the gateway IP
-                    clientStateEventSink?.success(DataUtils.createClientStateMap(true, gatewayIp, gatewayIp, api29ConnectedSsid))
+                    val clientIp = connectionInfo?.get("clientIpAddress") as? String
+                    clientStateEventSink?.success(DataUtils.createClientStateMap(true, gatewayIp, clientIp, api29ConnectedSsid))
                 }
             }
 
@@ -241,8 +241,8 @@ class ClientManager(
                     Log.d(TAG, "Link properties changed for $api29ConnectedSsid: $linkProperties")
                     mainHandler.post {
                         val gatewayIp = DataUtils.getGatewayIpFromLinkProperties(linkProperties)
-                        // For client, the host IP is the gateway IP
-                        clientStateEventSink?.success(DataUtils.createClientStateMap(true, gatewayIp, gatewayIp, api29ConnectedSsid))
+                        val clientIp = DataUtils.getClientIpFromLinkProperties(linkProperties)
+                        clientStateEventSink?.success(DataUtils.createClientStateMap(true, gatewayIp, clientIp, api29ConnectedSsid))
                     }
                 }
             }
@@ -267,8 +267,8 @@ class ClientManager(
                     legacyNetworkId = currentWifiInfo.networkId
                     mainHandler.post { // Ensure thread safety for sink
                         val gatewayIp = DataUtils.getLegacyGatewayIpAddress(wifiManager)
-                        // For client, the host IP is the gateway IP
-                        clientStateEventSink?.success(DataUtils.createClientStateMap(true, gatewayIp, gatewayIp, ssid))
+                        val clientIp = DataUtils.getLegacyClientIpAddress(wifiManager)
+                        clientStateEventSink?.success(DataUtils.createClientStateMap(true, gatewayIp, clientIp, ssid))
                     }
                     result.success(true)
                     return
@@ -369,17 +369,16 @@ class ClientManager(
         }
 
         val gatewayIp = DataUtils.getLegacyGatewayIpAddress(wifiManager)
-        // For client, the host IP is the gateway IP
-        val hostIp = gatewayIp
+        val clientIp = DataUtils.getLegacyClientIpAddress(wifiManager)
         // Verify connection state again using connectionInfo before sending event
         val verifyInfo = wifiManager.connectionInfo
         val verifySsid = verifyInfo?.ssid?.removePrefix("\"")?.removeSuffix("\"")
         val verifyState = verifyInfo?.supplicantState
 
          if (verifySsid == expectedSsid && verifyState == android.net.wifi.SupplicantState.COMPLETED) {
-            Log.d(TAG, "Confirmed legacy connection established to $expectedSsid. Gateway: $gatewayIp")
+            Log.d(TAG, "Confirmed legacy connection established to $expectedSsid. Gateway: $gatewayIp, ClientIP: $clientIp")
             // Send success state if not already sent or if state changed (e.g., IP obtained)
-            clientStateEventSink?.success(DataUtils.createClientStateMap(true, gatewayIp, hostIp, expectedSsid))
+            clientStateEventSink?.success(DataUtils.createClientStateMap(true, gatewayIp, clientIp, expectedSsid))
          } else {
             Log.w(TAG,"Legacy connection to $expectedSsid not confirmed after delay. Current SSID: $verifySsid, State: $verifyState")
             // Send disconnect state if confirmation fails
@@ -414,8 +413,8 @@ class ClientManager(
                 if (currentNetwork != null && api29ConnectedSsid != null) {
                     val connInfo = DataUtils.getClientConnectionInfo(connectivityManager, currentNetwork)
                     val gatewayIp = connInfo?.get("gatewayIpAddress") as? String
-                    // For client, the host IP is the gateway IP
-                    initialState = DataUtils.createClientStateMap(true, gatewayIp, gatewayIp, api29ConnectedSsid)
+                    val clientIp = connInfo?.get("clientIpAddress") as? String
+                    initialState = DataUtils.createClientStateMap(true, gatewayIp, clientIp, api29ConnectedSsid)
                 } else {
                     initialState = DataUtils.createClientStateMap(false, null, null, null)
                 }
@@ -428,8 +427,8 @@ class ClientManager(
                     val verifyState = verifyInfo?.supplicantState
                     if(legacyConnectedSsid == verifySsid && verifyState == android.net.wifi.SupplicantState.COMPLETED) {
                         val gatewayIp = DataUtils.getLegacyGatewayIpAddress(wifiManager)
-                        // For client, the host IP is the gateway IP
-                        initialState = DataUtils.createClientStateMap(true, gatewayIp, gatewayIp, legacyConnectedSsid)
+                        val clientIp = DataUtils.getLegacyClientIpAddress(wifiManager)
+                        initialState = DataUtils.createClientStateMap(true, gatewayIp, clientIp, legacyConnectedSsid)
                     } else {
                         // State mismatch, report disconnected
                         Log.w(TAG, "onListen: Legacy state mismatch. Expected $legacyConnectedSsid, got $verifySsid ($verifyState). Reporting disconnected.")

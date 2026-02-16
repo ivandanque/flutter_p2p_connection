@@ -38,16 +38,16 @@ object DataUtils {
         )
     }
 
-    // Helper to get client connection details (like gateway IP) using Network object
+    // Helper to get client connection details (gateway IP and client's own IP) using Network object
     fun getClientConnectionInfo(connectivityManager: ConnectivityManager, network: Network?): Map<String, Any?>? {
         if (network == null) return null
          try {
             val linkProperties = connectivityManager.getLinkProperties(network) ?: return null
             val gatewayIp = getGatewayIpFromLinkProperties(linkProperties)
-            // val clientIp = getClientIpFromLinkProperties(linkProperties) // Can add if needed
+            val clientIp = getClientIpFromLinkProperties(linkProperties)
             return mapOf(
-                "gatewayIpAddress" to gatewayIp
-                // "clientIpAddress" to clientIp
+                "gatewayIpAddress" to gatewayIp,
+                "clientIpAddress" to clientIp
             )
          } catch (e: Exception) {
             Log.e(TAG, "Error getting client connection info: ${e.message}", e)
@@ -90,6 +90,42 @@ object DataUtils {
          Log.w(TAG, "Could not determine gateway IP from LinkProperties.")
          return null
      }
+
+    // Helper to extract the client's own IPv4 address from LinkProperties.
+    fun getClientIpFromLinkProperties(linkProperties: LinkProperties?): String? {
+        if (linkProperties == null) return null
+        linkProperties.linkAddresses.forEach { linkAddress ->
+            if (linkAddress.address is Inet4Address && !linkAddress.address.isLoopbackAddress) {
+                val ip = linkAddress.address.hostAddress
+                Log.d(TAG, "Client's own IP from LinkProperties: $ip")
+                return ip
+            }
+        }
+        Log.w(TAG, "Could not determine client IP from LinkProperties.")
+        return null
+    }
+
+    // Helper to get the client's own IP in Legacy mode (from DhcpInfo).
+    @SuppressLint("Deprecated")
+    fun getLegacyClientIpAddress(wifiManager: WifiManager): String? {
+        try {
+            val dhcpInfo = wifiManager.dhcpInfo ?: return null
+            val ipInt = dhcpInfo.ipAddress
+            if (ipInt == 0) return null
+            val ipBytes = byteArrayOf(
+                (ipInt and 0xff).toByte(),
+                (ipInt shr 8 and 0xff).toByte(),
+                (ipInt shr 16 and 0xff).toByte(),
+                (ipInt shr 24 and 0xff).toByte()
+            )
+            val clientAddress = InetAddress.getByAddress(ipBytes).hostAddress
+            Log.d(TAG, "Legacy client IP: $clientAddress")
+            return clientAddress
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting legacy client IP: ${e.message}", e)
+            return null
+        }
+    }
 
     // Helper to get Gateway IP in Legacy mode
     @SuppressLint("Deprecated")

@@ -536,8 +536,12 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
                   !excludeClientIds.contains(client.id)),
         )
         .toList();
+    // Prefer the native-reported client IP (from LinkProperties / DhcpInfo)
+    // over Dart's NetworkInterface.list() which may return the wrong
+    // interface IP after bindProcessToNetwork().
     final actualSenderIp =
-        await getLocalIpAddress() ?? _lastKnownClientState!.hostIpAddress!;
+        _lastKnownClientState!.hostIpAddress ?? await getLocalIpAddress() ?? '0.0.0.0';
+    debugPrint('Client: broadcastFile senderIp=$actualSenderIp (native=${_lastKnownClientState!.hostIpAddress})');
     return await transport.shareFile(
       file,
       actualSenderIp: actualSenderIp,
@@ -572,8 +576,12 @@ class FlutterP2pClient extends FlutterP2pConnectionBase {
       debugPrint("Client: Target client $clientId not found for sending file.");
       return null;
     }
+    // Prefer the native-reported client IP (from LinkProperties / DhcpInfo)
+    // over Dart's NetworkInterface.list() which may return the wrong
+    // interface IP after bindProcessToNetwork().
     final actualSenderIp =
-        await getLocalIpAddress() ?? _lastKnownClientState!.hostIpAddress!;
+        _lastKnownClientState!.hostIpAddress ?? await getLocalIpAddress() ?? '0.0.0.0';
+    debugPrint('Client: sendFileToClient senderIp=$actualSenderIp (native=${_lastKnownClientState!.hostIpAddress})');
     return await transport.shareFile(
       file,
       actualSenderIp: actualSenderIp,
